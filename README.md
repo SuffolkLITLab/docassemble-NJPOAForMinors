@@ -1,2 +1,3 @@
-# docassemble-NJPOAForMinors
-A docassemble project for NJPOAV4.
+# docassemble.NJPOAForMinors
+
+A docassemble extension.

@@ -1,0 +1,940 @@
+---
+include:
+  - docassemble.AssemblyLine:assembly_line.yml
+  - docassemble.ALAnyState:any_state.yml
+---
+metadata:
+  title: >-
+    NJ Power of Attorney Delegation Fillable-with-fields-with-fields9-19
+  short title: >-
+    NJ Power of Attorney Dele
+  description: |-
+    This form allows parents, custodians, or guardians to delegate authority to an alternative caregiver for the care of their minor child or ward. It ensures that the caregiver can make important decisions regarding the child's welfare.
+  can_I_use_this_form: |
+    You can use this form if you are a parent, custodian, or guardian wishing to temporarily delegate your authority over a minor child. Ensure you have the necessary consent from any other legal guardians involved.
+  before_you_start: |
+    ### Before you get started
+    - Gather the necessary information about yourself, the child, and the alternative caregiver.
+    - Ensure that the other parent or legal guardian is available to provide consent if required.
+
+    ### When you are finished
+    - Sign the form in the presence of witnesses.
+    - Provide a copy to the attorney-in-fact and retain a copy for your records.
+  when_you_are_finished: |
+    After completing the form, ensure that the attorney-in-fact understands their responsibilities. Keep a copy for your records and provide one to the designated caregiver.
+  efiling_enabled: False
+  integrated_efiling: False
+  integrated_email_filing: False
+  requires_notarization: False
+  unlisted: False
+  landing_page_url: >-
+    https://courtformsonline.org/
+  maturity: production
+  estimated_completion_minutes: ""
+  estimated_completion_delta: ""
+  LIST_topics:
+    - "CO-00-00-00-00"
+  tags:
+    - "CO-00-00-00-00"
+  authors:
+    - Court Forms Online
+  original_form: []
+  original_form_published_on: ""
+  help_page_url: >-
+    https://pub.njleg.gov/bills/2020/A5000/4640_I1.HTM
+  help_page_title: >-
+
+  allowed_courts: []
+  typical_role: "unknown"
+  al_weaver_version: "2.3.1"
+  generated_on: "2026-09-19"
+  languages:
+    - en
+  jurisdiction: "NAM-US-US+NJ"
+  review_date: 2026-09-19
+  form_titles:
+    - NJ Power of Attorney Delegation Fillable-with-fields-with-fields9-19
+  form_numbers: []
+  update_notes: ""
+---
+code: |
+  # This controls the default country and list of states in address field questions
+  AL_DEFAULT_COUNTRY = "US"
+---
+code: |
+  # This controls the default state in address field questions
+  AL_DEFAULT_STATE = "NJ"
+---
+code: |
+  github_repo_name = 'docassemble-NjPowerOfAttorneyDelegationFillablewithfieldswithfields919'
+---
+template: interview_short_title
+content: |
+  Delegate authority for your child’s care
+---
+code: |
+  al_form_type = "other_form"
+---
+id: alweaver assemblyline settings
+initial: True
+code: |
+  # These exact-name variables drive the reusable next-steps DOCX shell and
+  # are editable in Weaver's AssemblyLine settings panel.
+  al_next_steps_enabled = True
+  al_next_steps_intro_prompt = 'Delegate authority for your child’s care'
+  al_next_steps_title = 'NJ Power of Attorney Delegation Fillable-with-fields-with-fields9-19'
+  al_next_steps_document_title = 'Power of Attorney'
+  al_next_steps_document_purpose = 'Delegation'
+  al_next_steps_help_organization = ''
+  al_next_steps_help_url = 'https://pub.njleg.gov/bills/2020/A5000/4640_I1.HTM'
+  al_next_steps_generate_qr_code = False
+  al_next_steps_what_happens_next = 'After completing the form, ensure that the attorney-in-fact understands their responsibilities. Keep a copy for your records and provide one to the designated caregiver.'
+  al_next_steps_what_can_decision_maker_do = 'The decision-maker can manage day-to-day care, make medical decisions, and handle educational needs for the child. They will act in the best interest of the child during the delegation period.'
+  al_next_steps_what_happens_if_i_win = 'If the delegation is successful, the child will receive the necessary care and support while you are unable to provide it. You can revoke the delegation at any time if circumstances change.'
+---
+objects:
+  - caregivers: ALPeopleList.using(there_are_any=True)
+  - children: ALPeopleList.using(there_are_any=True)
+  - other_parent: ALPeopleList.using(ask_number=True,target_number=1)
+  - users: ALPeopleList.using(ask_number=True,target_number=1)
+  - witnesses: ALPeopleList.using(there_are_any=True)
+---
+sections:
+  - parties: Parties Information
+  - case_details: Form Details
+  - review_nj_power_of_attorney_delegation_fillablewithfieldswithfields919: Review your answers
+  - sign_and_submit: Sign & Submit
+---
+#################### Interview order #####################
+comment: |
+  Controls order and branching logic for questions specific to this form
+id: interview_order_nj_power_of_attorney_delegation_fillablewithfieldswithfields919
+mandatory: True
+code: |
+  al_intro_screen
+  nj_power_of_attorney_delegation_fillablewithfieldswithfields919_intro
+  nav.set_section('parties')
+  users_names
+  caregiver2_address
+  children1_name
+  
+
+  nav.set_section('case_details')
+  set_progress(25)
+  power_caregiving_yes
+  triggering_event_execution_yes
+  other_parent_deceased_yes
+
+  nav.set_section('review_nj_power_of_attorney_delegation_fillablewithfieldswithfields919')
+  set_progress(50)
+  nj_power_of_attorney_delegation_fillablewithfieldswithfields919_preview_question
+  
+  nav.set_section('sign_and_submit')
+  set_progress(75)
+  signature_date
+  basic_questions_signature_flow
+  
+  store_variables_snapshot( persistent=True, data={ "zip": showifdef("users[0].address.zip"), "reached_interview_end": True, }, )
+
+
+  set_progress(100)
+  nj_power_of_attorney_delegation_fillablewithfieldswithfields919_download
+---
+id: NJ Power of Attorney Delegation Fillable with fields with fields9 19 intro
+continue button field: nj_power_of_attorney_delegation_fillablewithfieldswithfields919_intro
+question: NJ Temporary Power of Attorney Delegation for Minor Children (Fillable Form)
+subquestion: |
+  ### Before you get started
+  - Gather the necessary information about yourself, the child, and the alternative caregiver.
+  - Ensure that the other parent or legal guardian is available to provide consent if required.
+  
+  ### When you are finished
+  - Sign the form in the presence of witnesses.
+  - Provide a copy to the attorney-in-fact and retain a copy for your records.
+  
+  You can use this form if you are a parent, custodian, or guardian wishing to temporarily delegate your authority over a minor child. Ensure you have the necessary consent from any other legal guardians involved.
+  
+  More questions? Ask here: **Add AskLit**
+---
+id: Parties Information
+question: |
+  Parties Information
+subquestion: "Provide details about the parent(s), custodian(s), or guardian(s) and the assigned caregiver."
+fields:
+  - "Names of parent(s), custodian(s), or guardian(s)": users_names
+    datatype: area
+  - label: "Addresses of parent(s), custodian(s), or guardian(s)"
+    field: users_addresses
+    datatype: area
+    input type: area
+  - "Phone numbers of parent(s), custodian(s), or guardian(s)": users_phone_numbers
+    datatype: area
+  - label: Name of alternative caregiver
+    field: caregiver_address
+    input type: area
+  - Home address of alternative caregiver: caregiver_address
+  - Phone number of alternative caregiver: caregiver_phone_number
+---
+id: children names
+question: Children/ Ward Information
+subquestion: What is your child(ren)’s/ ward’s name(s) and date(s) of birth?
+fields:
+  - Child/ Ward Name: children1_name
+  - label: Date of Birth
+    field: children1_birthdate
+    datatype: BirthDate
+  - label: Child/ Ward Name
+    field: children2_name
+    required: False
+  - label: Date of Birth
+    field: children2_birthdate
+    datatype: BirthDate
+    required: False
+  - label: Child/ Ward Name
+    field: children3_name
+    required: False
+  - label: Date of Birth
+    field: children3_birthdate
+    datatype: BirthDate
+    required: False
+  - label: Child/ Ward Name
+    field: children4_name
+    required: False
+  - label: Date of Birth
+    field: children4_birthdate
+    datatype: BirthDate
+    required: False
+---
+id: Alternate Attorney in Fact
+question: Alternate Attorney-in-Fact/Caregiver
+subquestion: "In the event that the caregiver is unable or unwilling to act as attorney-in-fact to my child(ren)/ ward(s), I hearby name the following person as an alternate."
+fields:
+  - label: "Name of Alternate Caregiver "
+    field: caregiver2_name
+    input type: area
+  - "Address of Alternate Caregiver ": caregiver2_address
+  - "Phone Number of Alternate Caregiver ": caregiver2_phone_number
+---
+id: Delegated Powers
+question: |
+  Delegated Powers
+subquestion: Specify the powers being delegated to the Caregiver
+fields:
+  - "Caregiving power ": power_caregiving_yes
+    datatype: yesno
+  - Well-being power: power_wellbeing_yes
+    datatype: yesno
+  - "Education power ": power_education_yes
+    datatype: yesno
+  - Healthcare power: power_healthcare_yes
+    datatype: yesno
+  - "Travel power ": power_travel_yes
+    datatype: yesno
+  - "Financial power ": power_financial_yes
+    datatype: yesno
+  - "All Other Powers ": power_other_yes
+    datatype: yesno
+---
+id: Triggering Events
+question: |
+  Triggering Events
+subquestion: Select the event(s) that will give authority to the caregiver.
+fields:
+  - The execution of this document on the latest date below: triggering_event_execution_yes
+    datatype: yesno
+  - "My attending physician concludes that I am mentally incapacitated, and thus unable to care for my child(ren)/ ward(s)": triggering_event_mental_incapacity_yes
+    datatype: yesno
+  - "My attending physician concludes that I am physically debilitated, and thus unable to care for my child(ren)/ ward(s)": triggering_event_physical_debilitation_yes
+    datatype: yesno
+  - "I am detained in immigration detention, removed, or deported": triggering_event_immigration_yes
+    datatype: yesno
+  - "I am incarcerated based on criminal charges, including pending charges, or conviction": triggering_event_incarceration_yes
+    datatype: yesno
+  - I am deployed in military service: triggering_event_military_yes
+    datatype: yesno
+  - Upon my death: triggering_event_death_yes
+    datatype: yesno
+---
+id: Consent of Other Parent
+question: |
+  Consent of Other Parent
+subquestion: "If the other parent consents and will sign this form click “next.” If the other parent does not consent, provide reasons for lack of consent below:"
+fields:
+  - Other parent is deceased: other_parent_deceased_yes
+    datatype: yesno
+  - Other parent has no custody: other_parent_no_custody_yes
+    datatype: yesno
+  - Other parent unable to consent: other_parent_unable_consent_yes
+    datatype: yesno
+  - Other parent not involved: other_parent_not_involved_yes
+    datatype: yesno
+  - Other parent is unknown: other_parent_unknown_yes
+    datatype: yesno
+  - Other parent unreachable: other_parent_unreachable_yes
+    datatype: yesno
+  - label: "Description of diligent efforts made if parent is unreachable "
+    field: users_diligent_efforts
+    required: False
+    input type: area
+  - label: Other
+    field: other_parent_other_yes
+    datatype: yesno
+    input type: area
+  - label: Other explanation
+    field: other_parent_other_text
+    required: False
+---
+comment: |
+  The questions below are copies of the questions in AssemblyLine's
+  ql_baseline.yml, rewritten to name this interview's own objects instead of the
+  generic `x`. Edit them freely: they replace the AssemblyLine versions. Delete
+  one to go back to the AssemblyLine wording.
+---
+id: Signatures
+question: |
+  Signatures
+subquestion: |
+  Collect signatures and dates from the involved parties and witnesses.
+fields:
+  - label: "Parent, Custodian or Guardian signature"
+    field: users_signature
+    required: False
+  - "Date of Parent, Custodian or Guardian signature": users_signature_date
+    datatype: date
+  - label: "Other Parent's signature"
+    field: other_parent_signature
+    required: False
+    input type: area
+  - "Date of Other Parent's signature": other_parent_signature_date
+    datatype: date
+  - label: "Witness 1 signature "
+    field: witnesses1_signature
+    required: False
+    input type: area
+  - "Witness 1 Address ": witnesses1_address
+  - "Date of Witness 1 signature ": witnesses1_signature_date
+    datatype: date
+  - label: Witness 2 signature
+    field: witnesses2_signature
+    required: False
+  - Witness 2 Address: witnesses2_address
+  - Date of Witness 2 signature: witnesses2_signature_date
+    datatype: date
+---
+id: caregivers names
+sets:
+  - caregivers[i].name.first
+  - caregivers[i].name.last
+  - caregivers[i].name.middle
+  - caregivers[i].name.suffix
+question: |
+  % if hasattr(caregivers, 'ask_number') and caregivers.ask_number and caregivers.target_number == 1:
+  Name of caregiver
+  % else:
+  Name of the ${ ordinal(i) } caregiver
+  % endif
+fields:
+  - code: |
+      caregivers[i].name_fields()
+---
+id: another caregiver
+question: |
+  Is there another caregiver to tell us about?
+fields:
+  - no label: caregivers.there_is_another
+    datatype: yesnoradio
+---
+id: caregiver phone number
+question: |
+  What is ${ caregivers[i] }'s phone number?
+fields:
+  - Phone: caregivers[i].phone_number
+    datatype: al_international_phone
+---
+id: another child
+question: |
+  Is there another child to tell us about?
+fields:
+  - no label: children.there_is_another
+    datatype: yesnoradio
+---
+id: other parent names
+sets:
+  - other_parent[i].name.first
+  - other_parent[i].name.last
+  - other_parent[i].name.middle
+
+question: |
+  % if hasattr(other_parent, 'ask_number') and other_parent.ask_number and other_parent.target_number == 1:
+  Name of other parent
+  % else:
+  Name of the ${ ordinal(i) } other parent
+  % endif
+fields:
+  - code: |
+      other_parent[i].name_fields()
+---
+id: users names
+sets:
+  - users[i].name.first
+  - users[i].name.last
+  - users[i].name.middle
+
+question: |
+  % if i == 0 and al_person_answering == "user":
+  What is your name?
+  % elif al_form_type in ['starts_case', 'existing_case', 'appeal']:
+  Who is the ${ ordinal(i) } person on your side of the case?
+  % else:
+  What is the name of the ${ ordinal(i) } person who is adding their
+  name to this form with you?
+  % endif
+fields:
+  - code: |
+      users[i].name_fields()
+---
+id: witnesses names
+sets:
+  - "witnesses[i].name.first"
+  - "witnesses[i].name.last"
+  - "witnesses[i].name.middle"
+  - "witnesses[i].address"
+question: |
+  % if hasattr(witnesses, 'ask_number') and witnesses.ask_number and witnesses.target_number == 1:
+  Name of witness
+  % else:
+  Name of the ${ ordinal(i) } witness
+  % endif
+fields:
+  - code: |
+      witnesses[i].name_fields()
+  - Address: witnesses1_address
+---
+id: another witness
+question: |
+  Is there another witness to tell us about?
+fields:
+  - no label: witnesses.there_is_another
+    datatype: yesnoradio
+---
+id: preview nj_power_of_attorney_delegation_fillablewithfieldswithfields919
+question: |
+  Preview your form before you sign it
+subquestion: |
+  Here is a preview of the form you will sign on the next page.
+
+  ${ al_recipient_bundle.as_pdf(key='preview') }
+
+  Open the form preview in a new tab. Use the "Edit answers" button to edit your
+  answers.
+
+  ${ action_button_html(url_action('review_nj_power_of_attorney_delegation_fillablewithfieldswithfields919'), label=word('Edit answers'), color='info') }
+
+  Return to this interview tab to continue and sign your form.
+continue button field: nj_power_of_attorney_delegation_fillablewithfieldswithfields919_preview_question
+---
+code: |
+  signature_fields = ['users[0].signature', 'other_parent[0].signature', 'witnesses[0].signature', 'witnesses[1].signature']
+---
+id: nj power of attorney delegation fillablewithfieldswithfields919 review screen
+event: review_nj_power_of_attorney_delegation_fillablewithfieldswithfields919
+question: |
+  Review your answers
+review:
+  - Edit: users_names
+    button: |
+      **Parties Information**
+
+      Names of parent or guardian: ${ showifdef('users_names') }
+
+      Addresses of parent or guardian: ${ single_paragraph(users_addresses) if defined('users_addresses') else '' }
+
+      Phone numbers of parent or guardian: ${ showifdef('users_phone_numbers') }
+
+      Address of alternative caregiver: ${ single_paragraph(caregiver_address) if defined('caregiver_address') else '' }
+  - Edit: other_parent_deceased_yes
+    button: |
+      **Consent of Other Parent**
+
+      Other parent is deceased: ${ word(yesno(other_parent_deceased_yes)) if defined('other_parent_deceased_yes') else '' }
+
+      Other parent has no custody: ${ word(yesno(other_parent_no_custody_yes)) if defined('other_parent_no_custody_yes') else '' }
+
+      Other parent unable to consent: ${ word(yesno(other_parent_unable_consent_yes)) if defined('other_parent_unable_consent_yes') else '' }
+
+      Other parent not involved: ${ word(yesno(other_parent_not_involved_yes)) if defined('other_parent_not_involved_yes') else '' }
+
+      Other parent is unknown: ${ word(yesno(other_parent_unknown_yes)) if defined('other_parent_unknown_yes') else '' }
+
+      Other parent unreachable: ${ word(yesno(other_parent_unreachable_yes)) if defined('other_parent_unreachable_yes') else '' }
+
+      Description of diligent efforts: ${ single_paragraph(users_diligent_efforts) if defined('users_diligent_efforts') else '' }
+
+      Other parent reason specified: ${ word(yesno(other_parent_other_yes)) if defined('other_parent_other_yes') else '' }
+
+      Other parent reason explanation: ${ single_paragraph(other_parent_other_text) if defined('other_parent_other_text') else '' }
+  - Edit: power_caregiving_yes
+    button: |
+      **Delegated Powers**
+
+      Caregiving power granted: ${ word(yesno(power_caregiving_yes)) if defined('power_caregiving_yes') else '' }
+
+      Well-being power granted: ${ word(yesno(power_wellbeing_yes)) if defined('power_wellbeing_yes') else '' }
+
+      Education power granted: ${ word(yesno(power_education_yes)) if defined('power_education_yes') else '' }
+
+      Healthcare power granted: ${ word(yesno(power_healthcare_yes)) if defined('power_healthcare_yes') else '' }
+
+      Travel power granted: ${ word(yesno(power_travel_yes)) if defined('power_travel_yes') else '' }
+
+      Financial power granted: ${ word(yesno(power_financial_yes)) if defined('power_financial_yes') else '' }
+
+      Other powers granted: ${ word(yesno(power_other_yes)) if defined('power_other_yes') else '' }
+  - Edit: triggering_event_execution_yes
+    button: |
+      **Triggering Events**
+
+      Event execution triggers authority: ${ word(yesno(triggering_event_execution_yes)) if defined('triggering_event_execution_yes') else '' }
+
+      Mental incapacity triggers authority: ${ word(yesno(triggering_event_mental_incapacity_yes)) if defined('triggering_event_mental_incapacity_yes') else '' }
+
+      Physical debilitation triggers authority: ${ word(yesno(triggering_event_physical_debilitation_yes)) if defined('triggering_event_physical_debilitation_yes') else '' }
+
+      Immigration triggers authority: ${ word(yesno(triggering_event_immigration_yes)) if defined('triggering_event_immigration_yes') else '' }
+
+      Incarceration triggers authority: ${ word(yesno(triggering_event_incarceration_yes)) if defined('triggering_event_incarceration_yes') else '' }
+
+      Military deployment triggers authority: ${ word(yesno(triggering_event_military_yes)) if defined('triggering_event_military_yes') else '' }
+
+      Death triggers authority: ${ word(yesno(triggering_event_death_yes)) if defined('triggering_event_death_yes') else '' }
+  - Edit: caregiver2_address
+    button: |
+      **Alternate Attorney-in-Fact**
+
+      Address of alternate caregiver 2: ${ single_paragraph(caregiver2_address) if defined('caregiver2_address') else '' }
+  - Edit: users_signature_date
+    button: |
+      **Signatures**
+
+      Date of user's signature: ${ showifdef('users_signature_date') }
+
+      Date of other parent's signature: ${ showifdef('other_parent_signature_date') }
+
+      Address of first witness: ${ single_paragraph(witnesses1_address) if defined('witnesses1_address') else '' }
+
+      Date of first witness signature: ${ showifdef('witnesses1_signature_date') }
+
+      Address of second witness: ${ single_paragraph(witnesses2_address) if defined('witnesses2_address') else '' }
+
+      Date of second witness signature: ${ showifdef('witnesses2_signature_date') }
+  - Edit: caregivers.revisit
+    button: |
+      **Caregivers**
+
+      % for item in caregivers:
+        * ${ item }
+      % endfor
+  - Edit: children.revisit
+    button: |
+      **Children**
+
+      % for item in children:
+        * ${ item }
+      % endfor
+  - Edit: other_parent.revisit
+    button: |
+      **Other parent**
+
+      % for item in other_parent:
+        * ${ item }
+      % endfor
+  - Edit: witnesses.revisit
+    button: |
+      **Witnesses**
+
+      % for item in witnesses:
+        * ${ item }
+      % endfor
+  - Edit: users_names
+    button: |
+      **Names of parent or guardian**
+
+      Names of parent or guardian: ${ showifdef('users_names') }
+  - Edit: users_addresses
+    button: |
+      **Addresses of parent or guardian**
+
+      Addresses of parent or guardian: ${ single_paragraph(users_addresses) if defined('users_addresses') else '' }
+  - Edit: users_phone_numbers
+    button: |
+      **Phone numbers of parent or guardian**
+
+      Phone numbers of parent or guardian: ${ showifdef('users_phone_numbers') }
+  - Edit: caregiver_address
+    button: |
+      **Address of alternative caregiver**
+
+      Address of alternative caregiver: ${ single_paragraph(caregiver_address) if defined('caregiver_address') else '' }
+  - Edit: other_parent_deceased_yes
+    button: |
+      **Other parent is deceased**
+
+      Other parent is deceased: ${ word(yesno(other_parent_deceased_yes)) if defined('other_parent_deceased_yes') else '' }
+  - Edit: other_parent_no_custody_yes
+    button: |
+      **Other parent has no custody**
+
+      Other parent has no custody: ${ word(yesno(other_parent_no_custody_yes)) if defined('other_parent_no_custody_yes') else '' }
+  - Edit: other_parent_unable_consent_yes
+    button: |
+      **Other parent unable to consent**
+
+      Other parent unable to consent: ${ word(yesno(other_parent_unable_consent_yes)) if defined('other_parent_unable_consent_yes') else '' }
+  - Edit: other_parent_not_involved_yes
+    button: |
+      **Other parent not involved**
+
+      Other parent not involved: ${ word(yesno(other_parent_not_involved_yes)) if defined('other_parent_not_involved_yes') else '' }
+  - Edit: other_parent_unknown_yes
+    button: |
+      **Other parent is unknown**
+
+      Other parent is unknown: ${ word(yesno(other_parent_unknown_yes)) if defined('other_parent_unknown_yes') else '' }
+  - Edit: other_parent_unreachable_yes
+    button: |
+      **Other parent unreachable**
+
+      Other parent unreachable: ${ word(yesno(other_parent_unreachable_yes)) if defined('other_parent_unreachable_yes') else '' }
+  - Edit: users_diligent_efforts
+    button: |
+      **Description of diligent efforts**
+
+      Description of diligent efforts: ${ single_paragraph(users_diligent_efforts) if defined('users_diligent_efforts') else '' }
+  - Edit: other_parent_other_yes
+    button: |
+      **Other parent reason specified**
+
+      Other parent reason specified: ${ word(yesno(other_parent_other_yes)) if defined('other_parent_other_yes') else '' }
+  - Edit: other_parent_other_text
+    button: |
+      **Other parent reason explanation**
+
+      Other parent reason explanation: ${ single_paragraph(other_parent_other_text) if defined('other_parent_other_text') else '' }
+  - Edit: power_caregiving_yes
+    button: |
+      **Caregiving power granted**
+
+      Caregiving power granted: ${ word(yesno(power_caregiving_yes)) if defined('power_caregiving_yes') else '' }
+  - Edit: power_wellbeing_yes
+    button: |
+      **Well-being power granted**
+
+      Well-being power granted: ${ word(yesno(power_wellbeing_yes)) if defined('power_wellbeing_yes') else '' }
+  - Edit: power_education_yes
+    button: |
+      **Education power granted**
+
+      Education power granted: ${ word(yesno(power_education_yes)) if defined('power_education_yes') else '' }
+  - Edit: power_healthcare_yes
+    button: |
+      **Healthcare power granted**
+
+      Healthcare power granted: ${ word(yesno(power_healthcare_yes)) if defined('power_healthcare_yes') else '' }
+  - Edit: power_travel_yes
+    button: |
+      **Travel power granted**
+
+      Travel power granted: ${ word(yesno(power_travel_yes)) if defined('power_travel_yes') else '' }
+  - Edit: power_financial_yes
+    button: |
+      **Financial power granted**
+
+      Financial power granted: ${ word(yesno(power_financial_yes)) if defined('power_financial_yes') else '' }
+  - Edit: power_other_yes
+    button: |
+      **Other powers granted**
+
+      Other powers granted: ${ word(yesno(power_other_yes)) if defined('power_other_yes') else '' }
+  - Edit: triggering_event_execution_yes
+    button: |
+      **Event execution triggers authority**
+
+      Event execution triggers authority: ${ word(yesno(triggering_event_execution_yes)) if defined('triggering_event_execution_yes') else '' }
+  - Edit: triggering_event_mental_incapacity_yes
+    button: |
+      **Mental incapacity triggers authority**
+
+      Mental incapacity triggers authority: ${ word(yesno(triggering_event_mental_incapacity_yes)) if defined('triggering_event_mental_incapacity_yes') else '' }
+  - Edit: triggering_event_physical_debilitation_yes
+    button: |
+      **Physical debilitation triggers authority**
+
+      Physical debilitation triggers authority: ${ word(yesno(triggering_event_physical_debilitation_yes)) if defined('triggering_event_physical_debilitation_yes') else '' }
+  - Edit: triggering_event_immigration_yes
+    button: |
+      **Immigration triggers authority**
+
+      Immigration triggers authority: ${ word(yesno(triggering_event_immigration_yes)) if defined('triggering_event_immigration_yes') else '' }
+  - Edit: triggering_event_incarceration_yes
+    button: |
+      **Incarceration triggers authority**
+
+      Incarceration triggers authority: ${ word(yesno(triggering_event_incarceration_yes)) if defined('triggering_event_incarceration_yes') else '' }
+  - Edit: triggering_event_military_yes
+    button: |
+      **Military deployment triggers authority**
+
+      Military deployment triggers authority: ${ word(yesno(triggering_event_military_yes)) if defined('triggering_event_military_yes') else '' }
+  - Edit: triggering_event_death_yes
+    button: |
+      **Death triggers authority**
+
+      Death triggers authority: ${ word(yesno(triggering_event_death_yes)) if defined('triggering_event_death_yes') else '' }
+  - Edit: caregiver2_address
+    button: |
+      **Address of alternate caregiver 2**
+
+      Address of alternate caregiver 2: ${ single_paragraph(caregiver2_address) if defined('caregiver2_address') else '' }
+  - Edit: users_signature_date
+    button: |
+      **Date of user's signature**
+
+      Date of user's signature: ${ showifdef('users_signature_date') }
+  - Edit: other_parent_signature_date
+    button: |
+      **Date of other parent's signature**
+
+      Date of other parent's signature: ${ showifdef('other_parent_signature_date') }
+  - Edit: witnesses1_address
+    button: |
+      **Address of first witness**
+
+      Address of first witness: ${ single_paragraph(witnesses1_address) if defined('witnesses1_address') else '' }
+  - Edit: witnesses1_signature_date
+    button: |
+      **Date of first witness signature**
+
+      Date of first witness signature: ${ showifdef('witnesses1_signature_date') }
+  - Edit: witnesses2_address
+    button: |
+      **Address of second witness**
+
+      Address of second witness: ${ single_paragraph(witnesses2_address) if defined('witnesses2_address') else '' }
+  - Edit: witnesses2_signature_date
+    button: |
+      **Date of second witness signature**
+
+      Date of second witness signature: ${ showifdef('witnesses2_signature_date') }
+  - Edit: users.revisit
+    button: |
+      **Users**
+
+      % for item in users:
+        * ${ item }
+      % endfor
+---
+id: edit caregivers
+continue button field: caregivers.revisit
+question: |
+  Edit caregivers
+subquestion: |
+  ${ caregivers.table }
+
+  ${ caregivers.add_action() }
+---
+table: caregivers.table
+rows: caregivers
+columns:
+  - Name: |
+      row_item.name_full() if defined("row_item.name.first") else ""
+  - Phone number: |
+      row_item.phone_number if defined("row_item.phone_number") else ""
+edit:
+  - name.first
+  - phone_number
+confirm: True
+---
+id: edit children
+continue button field: children.revisit
+question: |
+  Edit children
+subquestion: |
+  ${ children.table }
+
+  ${ children.add_action() }
+---
+table: children.table
+rows: children
+columns:
+  - Name: |
+      row_item.name_full() if defined("row_item.name.first") else ""
+  - Birthdate: |
+      row_item.birthdate if defined("row_item.birthdate") else ""
+edit:
+  - name.first
+  - birthdate
+confirm: True
+---
+id: edit other parent
+continue button field: other_parent.revisit
+question: |
+  Edit other_parent
+subquestion: |
+  ${ other_parent.table }
+
+  ${ other_parent.add_action() }
+---
+table: other_parent.table
+rows: other_parent
+columns:
+  - Signature: |
+      row_item.signature if defined("row_item.signature") else ""
+edit: True
+confirm: True
+---
+id: edit witnesses
+continue button field: witnesses.revisit
+question: |
+  Edit witnesses
+subquestion: |
+  ${ witnesses.table }
+
+  ${ witnesses.add_action() }
+---
+table: witnesses.table
+rows: witnesses
+columns:
+  - Signature: |
+      row_item.signature if defined("row_item.signature") else ""
+edit: True
+confirm: True
+---
+id: edit users
+continue button field: users.revisit
+question: |
+  Edit users
+subquestion: |
+  ${ users.table }
+
+  ${ users.add_action() }
+---
+table: users.table
+rows: users
+columns:
+  - Signature: |
+      row_item.signature if defined("row_item.signature") else ""
+edit: True
+confirm: True
+---
+id: download nj_power_of_attorney_delegation_fillablewithfieldswithfields919
+event: nj_power_of_attorney_delegation_fillablewithfieldswithfields919_download
+question: |
+  All done
+subquestion: |
+  Thank you ${users}. Your form is ready to download and deliver.
+
+  Use the options on this page to view, download and send your form. Use the
+  "Edit answers" button to fix any mistakes.
+
+  ${ action_button_html(url_action('review_nj_power_of_attorney_delegation_fillablewithfieldswithfields919'), label=word('Edit answers'), color='info') }
+
+  ${ al_user_bundle.download_list_html() }
+
+  ${ al_user_bundle.send_button_html(show_editable_checkbox=False) }
+
+progress: 100
+---
+# ALDocument objects specify the metadata for each template
+objects:
+  - nj_power_of_attorney_delegation_fillablewithfieldswithfields919_Post_interview_instructions: ALDocument.using(filename="nj_power_of_attorney_delegation_fillablewithfieldswithfields919_next_steps.docx", title="Next steps", enabled=al_next_steps_enabled, has_addendum=False)
+  - nj_power_of_attorney_delegation_fillablewithfieldswithfields919_attachment: ALDocument.using(filename="nj_power_of_attorney_delegation_fillablewithfieldswithfields919", title="Power of Attorney", enabled=True, has_addendum=False)
+---
+# Bundles group the ALDocuments into separate downloads, such as for court and for the user
+objects:
+  - al_user_bundle: ALDocumentBundle.using(elements=[nj_power_of_attorney_delegation_fillablewithfieldswithfields919_Post_interview_instructions, nj_power_of_attorney_delegation_fillablewithfieldswithfields919_attachment], filename="nj_power_of_attorney_delegation_fillablewithfieldswithfields919", title="All documents", enabled=True)
+  - al_recipient_bundle: ALDocumentBundle.using(elements=[nj_power_of_attorney_delegation_fillablewithfieldswithfields919_attachment], filename="nj_power_of_attorney_delegation_fillablewithfieldswithfields919",  title="All documents", enabled=True)
+---
+template: nj_power_of_attorney_delegation_fillablewithfieldswithfields919_Post_interview_instructions.title
+content: |
+  Instructions
+---
+template: nj_power_of_attorney_delegation_fillablewithfieldswithfields919_attachment.title
+content: |
+  NJ Power of Attorney Delegation Fillable-with-fields-with-fields9-19
+---
+template: al_user_bundle.title
+content: |
+  All forms to download for your records
+---
+template: al_recipient_bundle.title
+content: |
+  All forms to file
+---
+# Each attachment defines a key in an ALDocument. We use `i` as the placeholder here so the
+# same template is used for "preview" and "final" keys, and logic in the template checks
+# the value of `i` to show or hide the user's signature
+attachment:
+  name: Post-interview-Instructions
+  filename: nj_power_of_attorney_delegation_fillablewithfieldswithfields919_next_steps
+  docx template file: nj_power_of_attorney_delegation_fillablewithfieldswithfields919_next_steps.docx
+  variable name: nj_power_of_attorney_delegation_fillablewithfieldswithfields919_Post_interview_instructions[i]
+  skip undefined: True
+  tagged pdf: True
+---
+attachment:
+  name: nj power of attorney delegation fillablewithfieldswithfields919
+  filename: nj_power_of_attorney_delegation_fillablewithfieldswithfields919
+  variable name: nj_power_of_attorney_delegation_fillablewithfieldswithfields919_attachment[i]
+  skip undefined: True
+  pdf template file: NJ_Power_of_Attorney_Delegation_Fillable-with-fields-with-fields9-19.pdf
+  fields:
+      - "users_names": ${ users_names }
+      - "users_addresses": ${ users_addresses }
+      - "users_phone_numbers": ${ users_phone_numbers }
+      - "caregiver_name": ${ caregiver_name }
+      - "caregiver_address": ${ caregiver_address }
+      - "caregiver_phone_number": ${ caregiver_phone_number }
+      - "other_parent_deceased_yes": ${ other_parent_deceased_yes }
+      - "other_parent_no_custody_yes": ${ other_parent_no_custody_yes }
+      - "other_parent_unable_consent_yes": ${ other_parent_unable_consent_yes }
+      - "other_parent_not_involved_yes": ${ other_parent_not_involved_yes }
+      - "other_parent_unknown_yes": ${ other_parent_unknown_yes }
+      - "other_parent_unreachable_yes": ${ other_parent_unreachable_yes }
+      - "users_diligent_efforts": ${ users_diligent_efforts }
+      - "other_parent_other_yes": ${ other_parent_other_yes }
+      - "other_parent_other_text": ${ other_parent_other_text }
+      - "children1_name": ${ children1_name }
+      - "children1_birthdate": ${ children1_birthdate }
+      - "children2_name": ${ children2_name }
+      - "children2_birthdate": ${ children2_birthdate }
+      - "children3_name": ${ children3_name }
+      - "children3_birthdate": ${ children3_birthdate }
+      - "children4_name": ${ children4_name }
+      - "children4_birthdate": ${ children4_birthdate }
+      - "power_caregiving_yes": ${ power_caregiving_yes }
+      - "power_wellbeing_yes": ${ power_wellbeing_yes }
+      - "power_education_yes": ${ power_education_yes }
+      - "power_healthcare_yes": ${ power_healthcare_yes }
+      - "power_travel_yes": ${ power_travel_yes }
+      - "power_financial_yes": ${ power_financial_yes }
+      - "power_other_yes": ${ power_other_yes }
+      - "triggering_event_execution_yes": ${ triggering_event_execution_yes }
+      - "triggering_event_mental_incapacity_yes": ${ triggering_event_mental_incapacity_yes }
+      - "triggering_event_physical_debilitation_yes": ${ triggering_event_physical_debilitation_yes }
+      - "triggering_event_immigration_yes": ${ triggering_event_immigration_yes }
+      - "triggering_event_incarceration_yes": ${ triggering_event_incarceration_yes }
+      - "triggering_event_military_yes": ${ triggering_event_military_yes }
+      - "triggering_event_death_yes": ${ triggering_event_death_yes }
+      - "caregiver2_name": ${ caregiver2_name }
+      - "caregiver2_address": ${ caregiver2_address }
+      - "caregiver2_phone_number": ${ caregiver2_phone_number }
+      - "users_signature": ${ users[0].signature_if_final(i) }
+      - "users_signature_date": ${ users_signature_date.format() }
+      - "other_parent_signature": ${ other_parent[0].signature_if_final(i) }
+      - "other_parent_signature_date": ${ other_parent_signature_date.format() }
+      - "witnesses1_signature": ${ witnesses[0].signature_if_final(i) }
+      - "witnesses1_address": ${ witnesses1_address }
+      - "witnesses1_signature_date": ${ witnesses1_signature_date.format() }
+      - "witnesses2_signature": ${ witnesses[1].signature_if_final(i) }
+      - "witnesses2_address": ${ witnesses2_address }
+      - "witnesses2_signature_date": ${ witnesses2_signature_date.format() }
