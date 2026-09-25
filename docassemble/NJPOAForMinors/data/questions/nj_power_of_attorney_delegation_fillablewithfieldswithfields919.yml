@@ -117,26 +117,21 @@ code: |
   users_names
   caregiver2_address
   children1_name
-  
-
   nav.set_section('case_details')
   set_progress(25)
   power_caregiving_yes
   triggering_event_execution_yes
-  other_parent_deceased_yes
-
+  other_parent_will_sign
+  if not other_parent_will_sign:
+    other_parent_deceased_yes
   nav.set_section('review_nj_power_of_attorney_delegation_fillablewithfieldswithfields919')
   set_progress(50)
   nj_power_of_attorney_delegation_fillablewithfieldswithfields919_preview_question
-  
   nav.set_section('sign_and_submit')
   set_progress(75)
   signature_date
   basic_questions_signature_flow
-  
   store_variables_snapshot( persistent=True, data={ "zip": showifdef("users[0].address.zip"), "reached_interview_end": True, }, )
-
-
   set_progress(100)
   nj_power_of_attorney_delegation_fillablewithfieldswithfields919_download
 ---
@@ -255,6 +250,12 @@ fields:
   - Upon my death: triggering_event_death_yes
     datatype: yesno
 ---
+id: question_1790192051493
+question: Will the other parent sign?
+fields:
+  - Other parent sign?: other_parent_will_sign
+    datatype: yesnoradio
+---
 id: Consent of Other Parent
 question: |
   Consent of Other Parent
@@ -275,6 +276,7 @@ fields:
   - label: "Description of diligent efforts made if parent is unreachable "
     field: users_diligent_efforts
     required: False
+    show if: other_parent_unreachable_yes
     input type: area
   - label: Other
     field: other_parent_other_yes
@@ -283,6 +285,7 @@ fields:
   - label: Other explanation
     field: other_parent_other_text
     required: False
+    show if: other_parent_other_yes
 ---
 comment: |
   The questions below are copies of the questions in AssemblyLine's
