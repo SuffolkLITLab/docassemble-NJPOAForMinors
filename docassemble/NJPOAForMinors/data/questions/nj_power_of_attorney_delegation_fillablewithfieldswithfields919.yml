@@ -115,9 +115,10 @@ code: |
   nj_power_of_attorney_delegation_fillablewithfieldswithfields919_intro
   nav.set_section('parties')
   users_names
+  caregiver_name
+  nav.set_section('case_details')
   caregiver2_address
   children1_name
-  nav.set_section('case_details')
   set_progress(25)
   power_caregiving_yes
   triggering_event_execution_yes
@@ -130,6 +131,7 @@ code: |
   nav.set_section('sign_and_submit')
   set_progress(75)
   signature_date
+  sign_now
   basic_questions_signature_flow
   store_variables_snapshot( persistent=True, data={ "zip": showifdef("users[0].address.zip"), "reached_interview_end": True, }, )
   set_progress(100)
@@ -154,81 +156,120 @@ subquestion: |
 id: Parties Information
 question: |
   Parties Information
-subquestion: "Provide details about the parent(s), custodian(s), or guardian(s) and the assigned caregiver."
+subquestion: "Provide details about the parent(s), custodian(s), or guardian(s). Separate each person with a comma."
 fields:
-  - "Names of parent(s), custodian(s), or guardian(s)": users_names
+  - "Name(s):": users_names
     datatype: area
-  - label: "Addresses of parent(s), custodian(s), or guardian(s)"
+  - label: "Address(es):"
     field: users_addresses
     datatype: area
     input type: area
-  - "Phone numbers of parent(s), custodian(s), or guardian(s)": users_phone_numbers
+  - "Phone number(s):": users_phone_numbers
     datatype: area
-  - label: Name of alternative caregiver
-    field: caregiver_address
+---
+id: Caregiver Info
+question: |
+  Parties Information
+subquestion: Provide details about the caregiver.
+fields:
+  - label: "Name:"
+    field: caregiver_name
     input type: area
-  - Home address of alternative caregiver: caregiver_address
-  - Phone number of alternative caregiver: caregiver_phone_number
+  - "Home address:": caregiver_address
+  - "Phone number:": caregiver_phone_number
 ---
 id: children names
 question: Children/ Ward Information
-subquestion: What is your child(ren)’s/ ward’s name(s) and date(s) of birth?
+subquestion: Provide your child’s/ward’s name and date of birth
 fields:
-  - Child/ Ward Name: children1_name
-  - label: Date of Birth
-    field: children1_birthdate
+  - "Name:": children1_name
+  - "Date of Birth:": children1_birthdate
     datatype: BirthDate
-  - label: Child/ Ward Name
+  - label: Add another child
+    field: children2
+    datatype: yesno
+    required: False
+  - label: "Name:"
     field: children2_name
     required: False
+    show if: children2
   - label: Date of Birth
     field: children2_birthdate
     datatype: BirthDate
     required: False
-  - label: Child/ Ward Name
+    show if: children2
+  - label: Add another child
+    field: children3
+    datatype: yesno
+    required: False
+    show if: children2
+  - label: "Name:"
     field: children3_name
     required: False
-  - label: Date of Birth
+    show if: children3
+  - label: "Date of Birth:"
     field: children3_birthdate
     datatype: BirthDate
     required: False
-  - label: Child/ Ward Name
+    show if: children3
+  - label: Add another child
+    field: children4
+    datatype: yesno
+    required: False
+    show if: children3
+  - label: "Name:"
     field: children4_name
     required: False
-  - label: Date of Birth
+    show if: children4
+  - label: "Date of Birth:"
     field: children4_birthdate
     datatype: BirthDate
     required: False
+    show if: children4
 ---
 id: Alternate Attorney in Fact
 question: Alternate Attorney-in-Fact/Caregiver
-subquestion: "In the event that the caregiver is unable or unwilling to act as attorney-in-fact to my child(ren)/ ward(s), I hearby name the following person as an alternate."
+subquestion: In the event that the caregiver is unable or unwilling to act as attorney-in-fact name an alternate.
 fields:
-  - label: "Name of Alternate Caregiver "
+  - label: "Name:"
     field: caregiver2_name
     input type: area
-  - "Address of Alternate Caregiver ": caregiver2_address
-  - "Phone Number of Alternate Caregiver ": caregiver2_phone_number
+  - "Address: ": caregiver2_address
+  - "Phone Number:": caregiver2_phone_number
 ---
 id: Delegated Powers
 question: |
   Delegated Powers
 subquestion: Specify the powers being delegated to the Caregiver
 fields:
-  - "Caregiving power ": power_caregiving_yes
+  - label: "Caregiving power "
+    field: power_caregiving_yes
     datatype: yesno
-  - Well-being power: power_wellbeing_yes
+    help: "Temporary care-giving authority for the child(ren)/ward(s), until such time as the child(ren)/ward(s) is/are returned to our/my physical custody, or his/her/their custody status is altered by a federal, state, or local agency; or changed by a court of law."
+  - label: Well-being power
+    field: power_wellbeing_yes
     datatype: yesno
-  - "Education power ": power_education_yes
+    help: "Power to provide for the physical and mental well-being of the child(ren)/ward(s), including but not limited to providing food and shelter."
+  - label: "Education power "
+    field: power_education_yes
     datatype: yesno
-  - Healthcare power: power_healthcare_yes
+    help: "The authority to enroll the child(ren)/ward(s) in the appropriate educational institutions; obtain access to his/her/their school records; authorize his/her/their participation in school activities; and make any and all decisions related to his/her/their education, including, but not limited to, those related to special education."
+  - label: Healthcare power
+    field: power_healthcare_yes
     datatype: yesno
-  - "Travel power ": power_travel_yes
+    help: "The authority, to the same extent that a parent/custodian/guardian would have the authority, to make medical, dental, and mental health decisions; to sign documents, waivers and releases required by a hospital or physician; to access medical, dental, or mental health records concerning the child(ren)/ward(s); to authorize his/her/their admission to or discharge from any hospital or medical care facility; to consult with any provider of health care; to consent to the provision, withholding, modification or withdrawal of any health care procedure; and to make other decisions related to the health care needs of the child(ren)/ward(s)."
+  - label: "Travel power "
+    field: power_travel_yes
     datatype: yesno
-  - "Financial power ": power_financial_yes
+    help: "The authority to make travel arrangements on behalf of the child(ren)/ward(s) for destinations both inside and outside of the United States by air and/or ground transportation; to accompany the child(ren)/ward(s) on any such trips; and to make any and all related arrangements on behalf of the child(ren)/ward(s), including but not limited to hotel accommodations."
+  - label: "Financial power "
+    field: power_financial_yes
     datatype: yesno
-  - "All Other Powers ": power_other_yes
+    help: The power to handle any and all financial affairs and any and all personal and legal matters concerning the child(ren)/ward(s).
+  - label: "All Other Powers "
+    field: power_other_yes
     datatype: yesno
+    help: "The authority to handle and engage in any and all other matters relating to the care, custody, and property of the child or ward which are permitted pursuant to applicable State law."
 ---
 id: Triggering Events
 question: |
@@ -251,15 +292,15 @@ fields:
     datatype: yesno
 ---
 id: question_1790192051493
-question: Will the other parent sign?
+question: "Other Parent"
 fields:
-  - Other parent sign?: other_parent_will_sign
+  - Will the other parent sign?: other_parent_will_sign
     datatype: yesnoradio
 ---
 id: Consent of Other Parent
 question: |
   Consent of Other Parent
-subquestion: "If the other parent consents and will sign this form click “next.” If the other parent does not consent, provide reasons for lack of consent below:"
+subquestion: "If the other parent does not consent and will not sign the form, please provide reasons for lack of consent below:"
 fields:
   - Other parent is deceased: other_parent_deceased_yes
     datatype: yesno
@@ -329,7 +370,7 @@ sets:
   - caregivers[i].name.first
   - caregivers[i].name.last
   - caregivers[i].name.middle
-  - caregivers[i].name.suffix
+
 question: |
   % if hasattr(caregivers, 'ask_number') and caregivers.ask_number and caregivers.target_number == 1:
   Name of caregiver
@@ -362,11 +403,6 @@ fields:
     datatype: yesnoradio
 ---
 id: other parent names
-sets:
-  - other_parent[i].name.first
-  - other_parent[i].name.last
-  - other_parent[i].name.middle
-
 question: |
   % if hasattr(other_parent, 'ask_number') and other_parent.ask_number and other_parent.target_number == 1:
   Name of other parent
@@ -374,14 +410,15 @@ question: |
   Name of the ${ ordinal(i) } other parent
   % endif
 fields:
-  - code: |
-      other_parent[i].name_fields()
+  - "Other Parent/Guardian Name:": "other_parent[i]"
+  - "Date:": other_parent_signature_date
+    datatype: date
 ---
 id: users names
 sets:
   - users[i].name.first
   - users[i].name.last
-  - users[i].name.middle
+
 
 question: |
   % if i == 0 and al_person_answering == "user":
@@ -413,12 +450,28 @@ fields:
       witnesses[i].name_fields()
   - Address: witnesses1_address
 ---
+id: question_1790364611294
+question: |
+  Witness ${ ordinal(i) }, please sign
+  signature: witnesses[i].signature
+fields:
+  - New field: new_field_1790364611294
+---
 id: another witness
 question: |
   Is there another witness to tell us about?
 fields:
   - no label: witnesses.there_is_another
     datatype: yesnoradio
+---
+id: question_1790357534515
+question: "Are you with a notary, 2 witnesses and the other parent/guardian (if signing) and want to sign this document?"
+fields:
+  - "Select One:": sign_now
+    datatype: radio
+    choices:
+      - "Yes, I am ready to sign now"
+      - "No, I would like to continue without signing"
 ---
 id: preview nj_power_of_attorney_delegation_fillablewithfieldswithfields919
 question: |
