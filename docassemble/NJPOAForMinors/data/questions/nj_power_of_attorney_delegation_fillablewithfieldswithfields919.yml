@@ -114,6 +114,8 @@ code: |
   al_intro_screen
   nj_power_of_attorney_delegation_fillablewithfieldswithfields919_intro
   nav.set_section('parties')
+  users[0]
+  correct_form1
   users_names
   caregiver_name
   nav.set_section('case_details')
@@ -132,7 +134,8 @@ code: |
   set_progress(75)
   signature_date
   sign_now
-  basic_questions_signature_flow
+  if sign_now:
+    basic_questions_signature_flow
   store_variables_snapshot( persistent=True, data={ "zip": showifdef("users[0].address.zip"), "reached_interview_end": True, }, )
   set_progress(100)
   nj_power_of_attorney_delegation_fillablewithfieldswithfields919_download
@@ -152,6 +155,57 @@ subquestion: |
   You can use this form if you are a parent, custodian, or guardian wishing to temporarily delegate your authority over a minor child. Ensure you have the necessary consent from any other legal guardians involved.
   
   More questions? Ask here: **Add AskLit**
+---
+id: child birthdate
+question: |
+  When was ${ children[i] } born?
+fields:
+  - Birthdate: children[i].birthdate
+    datatype: BirthDate
+    alMonthLabel: ${ word('Month') }
+    alDayLabel: ${ word('Day') }
+    alYearLabel: ${ word('Year') }
+---
+id: any other parent
+question: |
+  Will this form include any other parent?
+fields:
+  - no label: other_parent.there_are_any
+    datatype: yesnoradio
+---
+id: any users
+question: |
+  Will this form include any users?
+fields:
+  - no label: users.there_are_any
+    datatype: yesnoradio
+---
+id: witness address
+sets:
+  - witnesses[i].address.address
+  - witnesses[i].address.city
+  - witnesses[i].address.state
+  - witnesses[i].address.zip
+  - witnesses[i].address.unit
+  - witnesses[i].address.country
+question: |
+  What is ${ witnesses[i].possessive('address') }?
+fields:
+  - code: |
+      witnesses[i].address_fields(
+          country_code=AL_DEFAULT_COUNTRY, default_state=AL_DEFAULT_STATE
+      )
+---
+id: question_1790895643121
+question: "Who is filling out this form?"
+fields:
+  - Full name: "users[0]"
+---
+id: question_1790896093586
+question: "Minor Children"
+fields:
+  - Do you want to fill this form out for a minor child/ward (under 18)?: correct_form1
+    datatype: yesnoradio
 ---
 id: Parties Information
 question: |
