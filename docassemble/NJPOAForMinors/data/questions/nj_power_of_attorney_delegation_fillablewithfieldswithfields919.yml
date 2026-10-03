@@ -138,6 +138,7 @@ code: |
   sign_now
   if sign_now:
     basic_questions_signature_flow
+    users_signature_date
   store_variables_snapshot( persistent=True, data={ "zip": showifdef("users[0].address.zip"), "reached_interview_end": True, }, )
   set_progress(100)
   nj_power_of_attorney_delegation_fillablewithfieldswithfields919_download
@@ -529,6 +530,41 @@ question: "Are you with a notary, 2 witnesses and the other parent/guardian (if 
 fields:
   - "Select One:": sign_now
     datatype: yesnoradio
+---
+---
+id: signature dates
+question: |
+  Signature Dates
+subquestion: |
+ Enter the date on which each person signed the document.
+fields:
+  - Date of parent/custodian/guardian signature: users_signature_date
+    datatype: date
+
+  - label: "Date of other parent's signature"
+    field: other_parent_signature_date
+    datatype: date
+    required: False
+
+  - Date of first witness signature: witnesses1_signature_date
+    datatype: date
+
+  - Date of second witness signature: witnesses2_signature_date
+    datatype: date
+---
+id: question_1791050233015
+question: ""
+subquestion: |
+  
+fields:
+  - New field: new_field_1791050233015
+---
+id: question_1791050219989
+question: ""
+subquestion: |
+  
+fields:
+  - New field: new_field_1791050219989
 ---
 id: preview nj_power_of_attorney_delegation_fillablewithfieldswithfields919
 question: |
