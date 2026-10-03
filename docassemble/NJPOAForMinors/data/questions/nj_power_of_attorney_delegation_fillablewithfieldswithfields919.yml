@@ -486,27 +486,36 @@ fields:
 ---
 id: witnesses names
 sets:
-  - "witnesses[i].address"
   - "witnesses[i].name.first"
   - "witnesses[i].name.last"
   - "witnesses[i].name.middle"
   - "witnesses[i].name.suffix"
 question: |
   % if hasattr(witnesses, 'ask_number') and witnesses.ask_number and witnesses.target_number == 1:
-  Name of witness
+  Name and address of witness
   % else:
-  Name of the ${ ordinal(i) } witness
+  Name and address of the ${ ordinal(i) } witness
   % endif
 fields:
   - code: |
       witnesses[i].name_fields()
+  - label: Address
+    field: witnesses1_address
+    show if:
+      code: |
+        i == 0
+  - label: Address
+    field: witnesses2_address
+    show if:
+      code: |
+        i == 1
 ---
-id: question_1790364611294
-question: |
-  Witness ${ ordinal(i) }, please sign
-  signature: witnesses[i].signature
-fields:
-  - New field: new_field_1790364611294
+# id: question_1790364611294
+# question: |
+#   Witness ${ ordinal(i) }, please sign
+#   signature: witnesses[i].signature
+# fields:
+#   - New field: new_field_1790364611294
 ---
 id: another witness
 question: |
