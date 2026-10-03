@@ -91,6 +91,7 @@ code: |
   al_next_steps_what_happens_next = 'After completing the form, ensure that the attorney-in-fact understands their responsibilities. Keep a copy for your records and provide one to the designated caregiver.'
   al_next_steps_what_can_decision_maker_do = 'The decision-maker can manage day-to-day care, make medical decisions, and handle educational needs for the child. They will act in the best interest of the child during the delegation period.'
   al_next_steps_what_happens_if_i_win = 'If the delegation is successful, the child will receive the necessary care and support while you are unable to provide it. You can revoke the delegation at any time if circumstances change.'
+  al_form_requires_digital_signature = False
 ---
 objects:
   - caregivers: ALPeopleList.using(there_are_any=True)
@@ -124,6 +125,7 @@ code: |
   set_progress(25)
   power_caregiving_yes
   triggering_event_execution_yes
+  other_parent.gather()
   other_parent_will_sign
   if not other_parent_will_sign:
     other_parent_deceased_yes
@@ -383,36 +385,36 @@ comment: |
   generic `x`. Edit them freely: they replace the AssemblyLine versions. Delete
   one to go back to the AssemblyLine wording.
 ---
-id: Signatures
-question: |
-  Signatures
-subquestion: |
-  Collect signatures and dates from the involved parties and witnesses.
-fields:
-  - label: "Parent, Custodian or Guardian signature"
-    field: users_signature
-    required: False
-  - "Date of Parent, Custodian or Guardian signature": users_signature_date
-    datatype: date
-  - label: "Other Parent's signature"
-    field: other_parent_signature
-    required: False
-    input type: area
-  - "Date of Other Parent's signature": other_parent_signature_date
-    datatype: date
-  - label: "Witness 1 signature "
-    field: witnesses1_signature
-    required: False
-    input type: area
-  - "Witness 1 Address ": witnesses1_address
-  - "Date of Witness 1 signature ": witnesses1_signature_date
-    datatype: date
-  - label: Witness 2 signature
-    field: witnesses2_signature
-    required: False
-  - Witness 2 Address: witnesses2_address
-  - Date of Witness 2 signature: witnesses2_signature_date
-    datatype: date
+# id: Signatures
+# question: |
+#   Signatures
+# subquestion: |
+#   Collect signatures and dates from the involved parties and witnesses.
+# fields:
+#   - label: "Parent, Custodian or Guardian signature"
+#     field: users_signature
+#     required: False
+#   - "Date of Parent, Custodian or Guardian signature": users_signature_date
+#     datatype: date
+#   - label: "Other Parent's signature"
+#     field: other_parent_signature
+#     required: False
+#     input type: area
+#   - "Date of Other Parent's signature": other_parent_signature_date
+#     datatype: date
+#   - label: "Witness 1 signature "
+#     field: witnesses1_signature
+#     required: False
+#     input type: area
+#   - "Witness 1 Address ": witnesses1_address
+#   - "Date of Witness 1 signature ": witnesses1_signature_date
+#     datatype: date
+#   - label: Witness 2 signature
+#     field: witnesses2_signature
+#     required: False
+#   - Witness 2 Address: witnesses2_address
+#   - Date of Witness 2 signature: witnesses2_signature_date
+#     datatype: date
 ---
 id: caregivers names
 sets:
@@ -484,10 +486,11 @@ fields:
 ---
 id: witnesses names
 sets:
+  - "witnesses[i].address"
   - "witnesses[i].name.first"
   - "witnesses[i].name.last"
   - "witnesses[i].name.middle"
-  - "witnesses[i].address"
+  - "witnesses[i].name.suffix"
 question: |
   % if hasattr(witnesses, 'ask_number') and witnesses.ask_number and witnesses.target_number == 1:
   Name of witness
@@ -497,7 +500,6 @@ question: |
 fields:
   - code: |
       witnesses[i].name_fields()
-  - Address: witnesses1_address
 ---
 id: question_1790364611294
 question: |
@@ -514,13 +516,10 @@ fields:
     datatype: yesnoradio
 ---
 id: question_1790357534515
-question: "Are you with a notary, 2 witnesses and the other parent/guardian (if signing) and want to sign this document?"
+question: "Are you with a notary, 2 witnesses and the other parent/guardian (if signing) and want to sign this document electronically?"
 fields:
   - "Select One:": sign_now
-    datatype: radio
-    choices:
-      - "Yes, I am ready to sign now"
-      - "No, I would like to continue without signing"
+    datatype: yesnoradio
 ---
 id: preview nj_power_of_attorney_delegation_fillablewithfieldswithfields919
 question: |
