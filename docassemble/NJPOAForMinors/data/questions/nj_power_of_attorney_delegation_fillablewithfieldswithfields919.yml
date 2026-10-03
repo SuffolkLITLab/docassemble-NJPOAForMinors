@@ -114,13 +114,13 @@ code: |
   al_intro_screen
   nj_power_of_attorney_delegation_fillablewithfieldswithfields919_intro
   nav.set_section('parties')
-  users[0]
+  users.gather()
   correct_form1
   users_names
   caregiver_name
-  nav.set_section('case_details')
   caregiver2_address
   children1_name
+  nav.set_section('case_details')
   set_progress(25)
   power_caregiving_yes
   triggering_event_execution_yes
@@ -195,11 +195,6 @@ fields:
       witnesses[i].address_fields(
           country_code=AL_DEFAULT_COUNTRY, default_state=AL_DEFAULT_STATE
       )
----
-id: question_1790895643121
-question: "Who is filling out this form?"
-fields:
-  - Full name: "users[0]"
 ---
 id: question_1790896093586
 question: "Minor Children"
