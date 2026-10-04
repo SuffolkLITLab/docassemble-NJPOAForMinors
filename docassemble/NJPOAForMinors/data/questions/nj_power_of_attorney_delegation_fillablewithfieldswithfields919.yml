@@ -117,6 +117,10 @@ code: |
   nav.set_section('parties')
   users.gather()
   correct_form1
+  if not correct_form1:
+    event = 'not_eligible'
+    force_ask('not_eligible')
+    exit
   users_names
   caregiver_name
   caregiver2_address
@@ -143,6 +147,7 @@ code: |
   store_variables_snapshot( persistent=True, data={ "zip": showifdef("users[0].address.zip"), "reached_interview_end": True, }, )
   set_progress(100)
   nj_power_of_attorney_delegation_fillablewithfieldswithfields919_download
+  
 ---
 id: NJ Power of Attorney Delegation Fillable with fields with fields9 19 intro
 continue button field: nj_power_of_attorney_delegation_fillablewithfieldswithfields919_intro
@@ -205,6 +210,12 @@ question: "Minor Children"
 fields:
   - Do you want to fill this form out for a minor child/ward (under 18)?: correct_form1
     datatype: yesnoradio
+---
+id: not_eligible
+question: "This interview cannot continue "
+subquestion: "This form handles delegation of temporary parental powers over minors in NJ. Based on your answers, this form may not be correct for you."
+event: not_eligible
+
 ---
 id: Parties Information
 question: |
@@ -536,7 +547,6 @@ question: |2
 fields:
   - "Select One:": sign_now
     datatype: yesnoradio
----
 ---
 id: signature dates
 question: |
