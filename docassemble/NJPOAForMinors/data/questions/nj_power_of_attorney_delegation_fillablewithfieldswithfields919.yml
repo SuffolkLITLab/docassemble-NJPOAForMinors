@@ -588,7 +588,15 @@ subquestion: |
 continue button field: nj_power_of_attorney_delegation_fillablewithfieldswithfields919_preview_question
 ---
 code: |
-  signature_fields = ['users[0].signature', 'other_parent[0].signature', 'witnesses[0].signature', 'witnesses[1].signature']
+  signature_fields = ['users[0].signature']
+
+  if other_parent_will_sign:
+      signature_fields.append('other_parent[0].signature')
+
+  signature_fields.extend([
+      'witnesses[0].signature',
+      'witnesses[1].signature'
+  ])
 ---
 id: nj power of attorney delegation fillablewithfieldswithfields919 review screen
 event: review_nj_power_of_attorney_delegation_fillablewithfieldswithfields919
