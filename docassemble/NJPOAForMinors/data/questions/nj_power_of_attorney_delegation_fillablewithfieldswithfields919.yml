@@ -120,6 +120,7 @@ code: |
   users_names
   caregiver_name
   caregiver2_address
+  children.gather()
   children1_name
   nav.set_section('case_details')
   set_progress(25)
@@ -230,54 +231,54 @@ fields:
   - "Home address:": caregiver_address
   - "Phone number:": caregiver_phone_number
 ---
-id: children names
-question: Children/ Ward Information
-subquestion: Provide your child’s/ward’s name and date of birth
-fields:
-  - "Name:": children1_name
-  - "Date of Birth:": children1_birthdate
-    datatype: BirthDate
-  - label: Add another child
-    field: children2
-    datatype: yesno
-    required: False
-  - label: "Name:"
-    field: children2_name
-    required: False
-    show if: children2
-  - label: Date of Birth
-    field: children2_birthdate
-    datatype: BirthDate
-    required: False
-    show if: children2
-  - label: Add another child
-    field: children3
-    datatype: yesno
-    required: False
-    show if: children2
-  - label: "Name:"
-    field: children3_name
-    required: False
-    show if: children3
-  - label: "Date of Birth:"
-    field: children3_birthdate
-    datatype: BirthDate
-    required: False
-    show if: children3
-  - label: Add another child
-    field: children4
-    datatype: yesno
-    required: False
-    show if: children3
-  - label: "Name:"
-    field: children4_name
-    required: False
-    show if: children4
-  - label: "Date of Birth:"
-    field: children4_birthdate
-    datatype: BirthDate
-    required: False
-    show if: children4
+# id: children names
+# question: Children/ Ward Information
+# subquestion: Provide your child’s/ward’s name and date of birth
+# fields:
+#   - "Name:": children1_name
+#   - "Date of Birth:": children1_birthdate
+#     datatype: BirthDate
+#   - label: Add another child
+#     field: children2
+#     datatype: yesno
+#     required: False
+#   - label: "Name:"
+#     field: children2_name
+#     required: False
+#     show if: children2
+#   - label: Date of Birth
+#     field: children2_birthdate
+#     datatype: BirthDate
+#     required: False
+#     show if: children2
+#   - label: Add another child
+#     field: children3
+#     datatype: yesno
+#     required: False
+#     show if: children2
+#   - label: "Name:"
+#     field: children3_name
+#     required: False
+#     show if: children3
+#   - label: "Date of Birth:"
+#     field: children3_birthdate
+#     datatype: BirthDate
+#     required: False
+#     show if: children3
+#   - label: Add another child
+#     field: children4
+#     datatype: yesno
+#     required: False
+#     show if: children3
+#   - label: "Name:"
+#     field: children4_name
+#     required: False
+#     show if: children4
+#   - label: "Date of Birth:"
+#     field: children4_birthdate
+#     datatype: BirthDate
+#     required: False
+#     show if: children4
 ---
 id: Alternate Attorney in Fact
 question: Alternate Attorney-in-Fact/Caregiver
@@ -557,19 +558,55 @@ fields:
   - "${witnesses[1].name.full() } ": witnesses2_signature_date
     datatype: date
 ---
-id: question_1791050233015
+id: children names
 question: ""
-subquestion: |
-  
 fields:
   - New field: new_field_1791050233015
 ---
-id: question_1791050219989
-question: ""
-subquestion: |
-  
+id: children names 1
+sets:
+  - children[i].name.first
+  - children[i].name.last
+  - children[i].name.middle
+  - children[i].name.suffix
+question: |
+  % if hasattr(children, 'ask_number') and children.ask_number and children.target_number == 1:
+  Name of child
+  % else:
+  Name of the ${ ordinal(i) } child
+  % endif
 fields:
-  - New field: new_field_1791050219989
+  - code: |
+      children[i].name_fields()
+  - label: Birthdate
+    field: children1_birthdate
+    show if:
+      code: |
+        i == 0
+  - label: Birthdate
+    field: children2_birthdate
+    show if:
+      code: |
+        i == 1
+  - label: Birthdate
+    field: children3_birthdate
+    show if:
+      code: |
+        i == 2
+  - label: Birthdate
+    field: children4_birthdate
+    show if:
+      code: |
+        i == 3
+  
+---
+id: code_1791144921638
+code: |
+  children1_name = children[0].name.full() if len(children) > 0 else ''
+  children2_name = children[1].name.full() if len(children) > 1 else ''
+  children3_name = children[2].name.full() if len(children) > 2 else ''
+  children4_name = children[3].name.full() if len(children) > 3 else ''
+  
 ---
 id: preview nj_power_of_attorney_delegation_fillablewithfieldswithfields919
 question: |
