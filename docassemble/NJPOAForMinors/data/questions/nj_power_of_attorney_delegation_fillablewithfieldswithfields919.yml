@@ -346,27 +346,27 @@ fields:
 id: question_1790192051493
 question: "Other Parent"
 fields:
-  - Will the other parent sign?: other_parent_will_sign
+  - "Will ${ other_parent[0].name.full() } sign?": other_parent_will_sign
     datatype: yesnoradio
 ---
 id: Consent of Other Parent
 question: |
   Consent of Other Parent
-subquestion: "If the other parent does not consent and will not sign the form, please provide reasons for lack of consent below:"
+subquestion: "If ${ other_parent[0].name.full() }  does not consent and will not sign the form, please provide reasons for lack of consent below:"
 fields:
-  - Other parent is deceased: other_parent_deceased_yes
+  - "${ other_parent[0].name.full() }  is deceased": other_parent_deceased_yes
     datatype: yesno
-  - Other parent has no custody: other_parent_no_custody_yes
+  - "${ other_parent[0].name.full() } does not have custody": other_parent_no_custody_yes
     datatype: yesno
-  - Other parent unable to consent: other_parent_unable_consent_yes
+  - "${ other_parent[0].name.full() } is unable to consent": other_parent_unable_consent_yes
     datatype: yesno
-  - Other parent not involved: other_parent_not_involved_yes
+  - "${ other_parent[0].name.full() } is not involved": other_parent_not_involved_yes
     datatype: yesno
   - Other parent is unknown: other_parent_unknown_yes
     datatype: yesno
-  - Other parent unreachable: other_parent_unreachable_yes
+  - "${ other_parent[0].name.full() } is unreachable": other_parent_unreachable_yes
     datatype: yesno
-  - label: "Description of diligent efforts made if parent is unreachable "
+  - label: "Description of diligent efforts made if ${ other_parent[0].name.full() }  is unreachable "
     field: users_diligent_efforts
     required: False
     show if: other_parent_unreachable_yes
@@ -526,7 +526,12 @@ fields:
     datatype: yesnoradio
 ---
 id: question_1790357534515
-question: "Are you with a notary, 2 witnesses and the other parent/guardian (if signing) and want to sign this document electronically?"
+question: |2
+  Are you with a notary, 2 witnesses \
+  % if other_parent_will_sign:
+  and ${ other_parent[0].name_full() } \
+  % endif
+  and want to sign this document electronically?
 fields:
   - "Select One:": sign_now
     datatype: yesnoradio
@@ -538,18 +543,18 @@ question: |
 subquestion: |
  Enter the date on which each person signed the document.
 fields:
-  - Date of parent/custodian/guardian signature: users_signature_date
+  - "${ users[0].name.full() } ": users_signature_date
     datatype: date
 
-  - label: "Date of other parent's signature"
+  - label: "${ other_parent[0].name.full() } "
     field: other_parent_signature_date
     datatype: date
-    required: False
+    hide if: {"code":"not other_parent_will_sign"}
 
-  - Date of first witness signature: witnesses1_signature_date
+  - "${witnesses[0].name.full() } ": witnesses1_signature_date
     datatype: date
 
-  - Date of second witness signature: witnesses2_signature_date
+  - "${witnesses[1].name.full() } ": witnesses2_signature_date
     datatype: date
 ---
 id: question_1791050233015
