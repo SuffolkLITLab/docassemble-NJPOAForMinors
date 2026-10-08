@@ -5,7 +5,7 @@ include:
 ---
 metadata:
   title: >-
-    NJ Power of Attorney Delegation Fillable-with-fields-with-fields9-19
+    NJ Temporary Power of Attorney Appointment of a Minor 
   short title: >-
     NJ Power of Attorney Dele
   description: |-
@@ -155,17 +155,17 @@ code: |
 ---
 id: NJ Power of Attorney Delegation Fillable with fields with fields9 19 intro
 continue button field: nj_power_of_attorney_delegation_fillablewithfieldswithfields919_intro
-question: NJ Temporary Power of Attorney Delegation for Minor Children (Fillable Form)
-subquestion: |
+question: "**NJ Temporary Power of Attorney Appointment of a Minor (Fillable Form)**"
+subquestion: |2
+  Complete this form if you are a parent, custodian, or guardian in NJ wishing to temporarily give your parental powers of a minor child to someone else.
+  
   ### Before you get started
-  - Gather the necessary information about yourself, the child, and the alternative caregiver.
-  - Ensure that the other parent or legal guardian is available to provide consent if required.
+  - Collect basic information about the parents and guardians, the children, and the appointed caregivers.
   
   ### When you are finished
-  - Sign the form in the presence of witnesses.
-  - Provide a copy to the attorney-in-fact and retain a copy for your records.
+  - Sign the form in the presence of a notary, 2 witnesses and the other parent or guardian (if applicable).
+  - Give a copy to the appointed caregiver and keep a copy for yourself.
   
-  You can use this form if you are a parent, custodian, or guardian wishing to temporarily delegate your authority over a minor child. Ensure you have the necessary consent from any other legal guardians involved.
   
   More questions? Ask here: **Add AskLit**
 ---
@@ -215,9 +215,9 @@ fields:
       )
 ---
 id: question_1790896093586
-question: "Minor Children"
+question: "Do you want to fill this form out for a minor child or ward (under 18)?"
 fields:
-  - Do you want to fill this form out for a minor child/ward (under 18)?: correct_form1
+  - no label: correct_form1
     datatype: yesnoradio
 ---
 id: not_eligible
