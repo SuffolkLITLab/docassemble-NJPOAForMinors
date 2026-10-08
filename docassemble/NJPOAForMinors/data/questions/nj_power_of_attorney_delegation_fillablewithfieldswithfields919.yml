@@ -96,8 +96,8 @@ code: |
 objects:
   - caregivers: ALPeopleList.using(there_are_any=True)
   - children: ALPeopleList.using(there_are_any=True)
-  - other_parent: ALPeopleList.using(ask_number=True,target_number=1)
-  - users: ALPeopleList.using(ask_number=True,target_number=1)
+  - other_parent: ALPeopleList.using(ask_number=True, target_number=1)
+  - users: "ALPeopleList.using(ask_number=True, target_number=1)"
   - witnesses: ALPeopleList.using(there_are_any=True)
 ---
 sections:
@@ -130,10 +130,14 @@ code: |
   set_progress(25)
   power_caregiving_yes
   triggering_event_execution_yes
-  other_parent.gather()
-  other_parent_will_sign
-  if not other_parent_will_sign:
-    other_parent_deceased_yes
+  other_parent_known
+  if other_parent_known:
+    other_parent.gather()
+    other_parent_will_sign
+    if not other_parent_will_sign:
+      other_parent_deceased_yes
+  else:
+    other_parent_unknown_yes = True
   nav.set_section('review_nj_power_of_attorney_delegation_fillablewithfieldswithfields919')
   set_progress(50)
   nj_power_of_attorney_delegation_fillablewithfieldswithfields919_preview_question
@@ -177,10 +181,15 @@ fields:
 ---
 id: any other parent
 question: |
-  Will this form include any other parent?
+  Do you know who the other parent is?
 fields:
   - no label: other_parent.there_are_any
     datatype: yesnoradio
+---
+# id: code_1791154347252
+# code: |
+#   other_parent_unknown_yes = len(other_parent) == 0
+#   
 ---
 id: any users
 question: |
@@ -354,6 +363,12 @@ fields:
     datatype: yesno
   - Upon my death: triggering_event_death_yes
     datatype: yesno
+---
+id: other_parent_known
+question: "Do you know who the other parent is?"
+fields:
+  - "Select:": other_parent_known
+    datatype: yesnoradio
 ---
 id: question_1790192051493
 question: "Other Parent"
@@ -540,7 +555,7 @@ fields:
 id: question_1790357534515
 question: |2
   Are you with a notary, 2 witnesses \
-  % if other_parent_will_sign:
+  % if other_parent_known and other_parent_will_sign:
   and ${ other_parent[0].name_full() } \
   % endif
   and want to sign this document electronically?
@@ -548,25 +563,36 @@ fields:
   - "Select One:": sign_now
     datatype: yesnoradio
 ---
-id: signature dates
-question: |
-  Signature Dates
-subquestion: |
- Enter the date on which each person signed the document.
-fields:
-  - "${ users[0].name.full() } ": users_signature_date
-    datatype: date
-
-  - label: "${ other_parent[0].name.full() } "
-    field: other_parent_signature_date
-    datatype: date
-    hide if: {"code":"not other_parent_will_sign"}
-
-  - "${witnesses[0].name.full() } ": witnesses1_signature_date
-    datatype: date
-
-  - "${witnesses[1].name.full() } ": witnesses2_signature_date
-    datatype: date
+# id: signature dates
+# question: |
+#   Signature Dates
+# subquestion: |
+#  Enter the date on which each person signed the document.
+# fields:
+#   - "${ users[0].name.full() } ": users_signature_date
+#     datatype: date
+#
+#   - label: "${ other_parent[0].name.full() } "
+#     field: other_parent_signature_date
+#     datatype: date
+#     show if: "{\"code\":other_parent_known and other_parent_will_sign}"
+#
+#   - "${witnesses[0].name.full() } ": witnesses1_signature_date
+#     datatype: date
+#
+#   - "${witnesses[1].name.full() } ": witnesses2_signature_date
+#     datatype: date
+---
+id: code_1791484735545
+code: |
+  users_signature_date = today()
+  witnesses1_signature_date = today()
+  witnesses2_signature_date = today()
+  
+  if other_parent_known and other_parent_will_sign:
+    other_parent_signature_date = today()
+  
+      
 ---
 id: children names
 question: ""
@@ -636,14 +662,15 @@ continue button field: nj_power_of_attorney_delegation_fillablewithfieldswithfie
 ---
 code: |
   signature_fields = ['users[0].signature']
-
-  if other_parent_will_sign:
+  
+  if other_parent_known and other_parent_will_sign:
       signature_fields.append('other_parent[0].signature')
-
+  
   signature_fields.extend([
       'witnesses[0].signature',
       'witnesses[1].signature'
   ])
+  
 ---
 id: nj power of attorney delegation fillablewithfieldswithfields919 review screen
 event: review_nj_power_of_attorney_delegation_fillablewithfieldswithfields919
