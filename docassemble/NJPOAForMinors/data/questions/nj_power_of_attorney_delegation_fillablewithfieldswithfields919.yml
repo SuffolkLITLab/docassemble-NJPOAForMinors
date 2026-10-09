@@ -122,22 +122,22 @@ code: |
     force_ask('not_eligible')
     exit
   users_names
-  caregiver_name
-  caregiver2_address
   children.gather()
   children1_name
-  nav.set_section('case_details')
-  set_progress(25)
-  power_caregiving_yes
-  triggering_event_execution_yes
-  other_parent_known
-  if other_parent_known:
+  share_custody
+  if share_custody:
     other_parent.gather()
     other_parent_will_sign
     if not other_parent_will_sign:
       other_parent_deceased_yes
   else:
-    other_parent_unknown_yes = True
+    other_parent_no_custody_yes
+  caregiver_name
+  caregiver2_address
+  nav.set_section('case_details')
+  set_progress(25)
+  power_caregiving_yes
+  triggering_event_execution_yes
   nav.set_section('review_nj_power_of_attorney_delegation_fillablewithfieldswithfields919')
   set_progress(50)
   nj_power_of_attorney_delegation_fillablewithfieldswithfields919_preview_question
@@ -151,7 +151,6 @@ code: |
   store_variables_snapshot( persistent=True, data={ "zip": showifdef("users[0].address.zip"), "reached_interview_end": True, }, )
   set_progress(100)
   nj_power_of_attorney_delegation_fillablewithfieldswithfields919_download
-  
 ---
 id: NJ Power of Attorney Delegation Fillable with fields with fields9 19 intro
 continue button field: nj_power_of_attorney_delegation_fillablewithfieldswithfields919_intro
@@ -364,11 +363,18 @@ fields:
   - Upon my death: triggering_event_death_yes
     datatype: yesno
 ---
-id: other_parent_known
-question: "Do you know who the other parent is?"
+# id: other_parent_known
+# question: "Do you know who the other parent is or share custody with anyone?"
+# fields:
+#   - no label: other_parent_known
+#     datatype: yesnoradio
+---
+id: question_1791498080632
+question: "Do you share custody with anyone?"
 fields:
-  - "Select:": other_parent_known
+  - no label: share_custody
     datatype: yesnoradio
+    
 ---
 id: question_1790192051493
 question: "Other Parent"
@@ -406,6 +412,18 @@ fields:
     field: other_parent_other_text
     required: False
     show if: other_parent_other_yes
+---
+id: alternate_consent
+question: |
+  Alternate consent
+subquestion: "Select all that apply"
+fields:
+  - Other parent does not have custody: other_parent_no_custody_yes
+    datatype: yesno
+  - Other parent is unknown: other_parent_unknown_yes
+    datatype: yesno
+  - Other parent is deceased: other_parent_deceased_yes
+    datatype: yesno
 ---
 comment: |
   The questions below are copies of the questions in AssemblyLine's
@@ -501,7 +519,7 @@ sets:
 
 question: |
   % if i == 0 and al_person_answering == "user":
-  What is your name?
+  Tell us about yourself
   % elif al_form_type in ['starts_case', 'existing_case', 'appeal']:
   Who is the ${ ordinal(i) } person on your side of the case?
   % else:
@@ -511,6 +529,10 @@ question: |
 fields:
   - code: |
       users[i].name_fields()
+  - label: address
+    field: users_address
+  - label: phone number
+    field: users_phone number
 ---
 id: witnesses names
 sets:
@@ -555,7 +577,7 @@ fields:
 id: question_1790357534515
 question: |2
   Are you with a notary, 2 witnesses \
-  % if other_parent_known and other_parent_will_sign:
+  % if share_custody and other_parent_will_sign:
   and ${ other_parent[0].name_full() } \
   % endif
   and want to sign this document electronically?
@@ -589,10 +611,11 @@ code: |
   witnesses1_signature_date = today()
   witnesses2_signature_date = today()
   
-  if other_parent_known and other_parent_will_sign:
+  if share_custody and other_parent_will_sign:
     other_parent_signature_date = today()
   
       
+  
 ---
 id: children names
 question: ""
@@ -663,7 +686,7 @@ continue button field: nj_power_of_attorney_delegation_fillablewithfieldswithfie
 code: |
   signature_fields = ['users[0].signature']
   
-  if other_parent_known and other_parent_will_sign:
+  if share_custody and other_parent_will_sign:
       signature_fields.append('other_parent[0].signature')
   
   signature_fields.extend([
