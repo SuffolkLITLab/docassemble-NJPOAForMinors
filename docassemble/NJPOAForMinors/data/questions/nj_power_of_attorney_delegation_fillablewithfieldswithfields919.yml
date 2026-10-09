@@ -1,3 +1,17 @@
+id: code_1791508172797
+code: |
+  users_names = [users[0].name.full()]
+  users_addresses = [users_address]
+  users_phone_numbers = [users_phone_number]
+  
+  if share_custody:
+    users_names.append(other_parent[0].name.full())
+    users_addresses.append(other_parent_address)
+    users_phone_numbers.append(other_parent_phone_number)
+  
+  
+  
+---
 ---
 include:
   - docassemble.AssemblyLine:assembly_line.yml
@@ -101,10 +115,11 @@ objects:
   - witnesses: ALPeopleList.using(there_are_any=True)
 ---
 sections:
-  - parties: Parties Information
-  - case_details: Form Details
-  - review_nj_power_of_attorney_delegation_fillablewithfieldswithfields919: Review your answers
-  - sign_and_submit: Sign & Submit
+  - intro: Introduction
+  - parties: People
+  - case_details: Appointment Details
+  - review_nj_power_of_attorney_delegation_fillablewithfieldswithfields919: Review
+  - sign_and_submit: Sign & Print
 ---
 #################### Interview order #####################
 comment: |
@@ -112,16 +127,16 @@ comment: |
 id: interview_order_nj_power_of_attorney_delegation_fillablewithfieldswithfields919
 mandatory: True
 code: |
+  nav.set_section('intro')
   al_intro_screen
   nj_power_of_attorney_delegation_fillablewithfieldswithfields919_intro
-  nav.set_section('parties')
   users.gather()
   correct_form1
   if not correct_form1:
     event = 'not_eligible'
     force_ask('not_eligible')
     exit
-  users_names
+  nav.set_section('parties')
   children.gather()
   children1_name
   share_custody
@@ -129,9 +144,10 @@ code: |
     other_parent.gather()
     other_parent_will_sign
     if not other_parent_will_sign:
-      other_parent_deceased_yes
+      other_parent_consent_screen
   else:
-    other_parent_no_custody_yes
+    alternate_consent_screen
+  users_names
   caregiver_name
   caregiver2_address
   nav.set_section('case_details')
@@ -225,19 +241,19 @@ subquestion: "This form handles delegation of temporary parental powers over min
 event: not_eligible
 
 ---
-id: Parties Information
-question: |
-  Parties Information
-subquestion: "Provide details about the parent(s), custodian(s), or guardian(s). Separate each person with a comma."
-fields:
-  - "Name(s):": users_names
-    datatype: area
-  - label: "Address(es):"
-    field: users_addresses
-    datatype: area
-    input type: area
-  - "Phone number(s):": users_phone_numbers
-    datatype: area
+# id: Parties Information
+# question: |
+#   Parties Information
+# subquestion: "Provide details about the parent(s), custodian(s), or guardian(s). Separate each person with a comma."
+# fields:
+#   - "Name(s):": users_names
+#     datatype: area
+#   - label: "Address(es):"
+#     field: users_addresses
+#     datatype: area
+#     input type: area
+#   - "Phone number(s):": users_phone_numbers
+#     datatype: area
 ---
 id: Caregiver Info
 question: |
@@ -383,6 +399,7 @@ fields:
     datatype: yesnoradio
 ---
 id: Consent of Other Parent
+continue button field: other_parent_consent_screen
 question: |
   Consent of Other Parent
 subquestion: "If ${ other_parent[0].name.full() }  does not consent and will not sign the form, please provide reasons for lack of consent below:"
@@ -407,13 +424,14 @@ fields:
   - label: Other
     field: other_parent_other_yes
     datatype: yesno
-    input type: area
   - label: Other explanation
     field: other_parent_other_text
+    input type: area
     required: False
     show if: other_parent_other_yes
 ---
 id: alternate_consent
+continue button field: alternate_consent_screen
 question: |
   Alternate consent
 subquestion: "Select all that apply"
@@ -507,9 +525,18 @@ question: |
   Name of the ${ ordinal(i) } other parent
   % endif
 fields:
-  - "Other Parent/Guardian Name:": "other_parent[i]"
-  - "Date:": other_parent_signature_date
-    datatype: date
+  - code: |
+      other_parent[i].name_fields()
+  - label: Address
+    field: other_parent_address
+  - label: Phone Number
+    field: other_parent_phone_number
+
+sets:
+  - "other_parent[i].name.first"
+  - "other_parent[i].name.last"
+  - "other_parent[i].name.middle"
+  - "other_parent[i].name.suffix"
 ---
 id: users names
 sets:
@@ -529,10 +556,10 @@ question: |
 fields:
   - code: |
       users[i].name_fields()
-  - label: address
+  - label: Address
     field: users_address
-  - label: phone number
-    field: users_phone number
+  - label: Phone Number
+    field: users_phone_number
 ---
 id: witnesses names
 sets:
