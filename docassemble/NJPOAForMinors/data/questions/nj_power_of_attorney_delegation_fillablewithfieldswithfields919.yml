@@ -1,6 +1,13 @@
+id: code_1791660512243
+code: |
+  caregiver_name = [caregivers[0].name.full()]
+  caregiver_address = [caregivers[0].address.on_one_line()]
+  
+---
 id: code_1791587376371
 code: |
-  users_address = users[0].address.on_one_line()
+  users_address = [users[0].address.on_one_line()]
+  other_parent_address = [other_parent[0].address.on_one_line()]
   
 ---
 id: code_1791508172797
@@ -14,9 +21,7 @@ code: |
     users_addresses.append(other_parent_address)
     users_phone_numbers.append(other_parent_phone_number)
   
-  
-  
----
+
 ---
 include:
   - docassemble.AssemblyLine:assembly_line.yml
@@ -114,8 +119,9 @@ code: |
 ---
 objects:
   - caregivers: ALPeopleList.using(there_are_any=True)
-  - children: ALPeopleList.using(there_are_any=True)
-  - other_parent: ALPeopleList.using(ask_number=True, target_number=1)
+  - caregivers2: ALPeopleList.using(there_are_any=True)
+  - children: ALPeopleList.using(ask_number=True, minimum_number=1)
+  - other_parent: "ALPeopleList.using(ask_number=True, target_number=1)"
   - users: "ALPeopleList.using(ask_number=True, target_number=1)"
   - witnesses: ALPeopleList.using(there_are_any=True)
 ---
@@ -143,8 +149,8 @@ code: |
     force_ask('not_eligible')
     exit
   nav.set_section('parties')
+  children.target_number
   children.gather()
-  children1_name
   share_custody
   if share_custody:
     other_parent.gather()
@@ -189,51 +195,98 @@ subquestion: |2
   
   
   More questions? Ask here: **Add AskLit**
+
 ---
-id: child birthdate
-question: |
-  When was ${ children[i] } born?
-fields:
-  - Birthdate: children[i].birthdate
-    datatype: BirthDate
-    alMonthLabel: ${ word('Month') }
-    alDayLabel: ${ word('Day') }
-    alYearLabel: ${ word('Year') }
+# id: user address
+# sets:
+#   - users[i].address.address
+#   - users[i].address.city
+#   - users[i].address.state
+#   - users[i].address.zip
+#   - users[i].address.unit
+#   - users[i].address.country
+# question: |
+#   % if i == 0 and al_person_answering == "user":
+#   What is your address?
+#   % else:
+#   What is ${ users[i] }'s address?
+#   % endif
+# fields:
+#   - label: |
+#       % if i > 0 and al_person_answering == "user":
+#       Same as your address
+#       % else:
+#       Same as ${ users[0] }'s address
+#       % endif
+#     field: users[i].address
+#     datatype: object_radio
+#     choices:
+#       - users[0].address if defined("users[0].address.address") else None
+#     object labeler: |
+#       lambda y: y.on_one_line()
+#     none of the above: |
+#       Somewhere else
+#     disable others: True
+#     show if:
+#       code: |
+#         i > 0 and defined("users[0].address.address")
+#   - code: |
+#       users[i].address_fields(
+#           country_code=AL_DEFAULT_COUNTRY, default_state=AL_DEFAULT_STATE
+#       )
 ---
-id: any other parent
-question: |
-  Do you know who the other parent is?
-fields:
-  - no label: other_parent.there_are_any
-    datatype: yesnoradio
+# id: child birthdate
+# question: |
+#   When was ${ children[i] } born?
+# fields:
+#   - Birthdate: children[i].birthdate
+#     datatype: BirthDate
+#     alMonthLabel: ${ word('Month') }
+#     alDayLabel: ${ word('Day') }
+#     alYearLabel: ${ word('Year') }
+---
+# id: any other parent
+# question: |
+#   Do you know who the other parent is?
+# fields:
+#   - no label: other_parent.there_are_any
+#     datatype: yesnoradio
 ---
 # id: code_1791154347252
 # code: |
 #   other_parent_unknown_yes = len(other_parent) == 0
 #   
 ---
-id: any users
-question: |
-  Will this form include any users?
+id: number of children or wards
+question: "How many children or wards are you appointing a caregiver for?"
 fields:
-  - no label: users.there_are_any
-    datatype: yesnoradio
+  - no label: children.target_number
+    datatype: integer
+    min: 1
+    default: 1
 ---
-id: witness address
-sets:
-  - witnesses[i].address.address
-  - witnesses[i].address.city
-  - witnesses[i].address.state
-  - witnesses[i].address.zip
-  - witnesses[i].address.unit
-  - witnesses[i].address.country
-question: |
-  What is ${ witnesses[i].possessive('address') }?
-fields:
-  - code: |
-      witnesses[i].address_fields(
-          country_code=AL_DEFAULT_COUNTRY, default_state=AL_DEFAULT_STATE
-      )
+# id: any users
+# question: |
+#   Will this form include any users?
+# fields:
+#   - no label: users.there_are_any
+#     datatype: yesnoradio
+---
+# id: witness address
+# sets:
+#   - witnesses[i].address.address
+#   - witnesses[i].address.city
+#   - witnesses[i].address.state
+#   - witnesses[i].address.zip
+#   - witnesses[i].address.unit
+#   - witnesses[i].address.country
+# question: |
+#   What is ${ witnesses[i].possessive('address') }?
+# fields:
+#   - code: |
+#       witnesses[i].address_fields(
+#           country_code=AL_DEFAULT_COUNTRY, default_state=AL_DEFAULT_STATE
+#       )
 ---
 id: question_1790896093586
 question: "Do you want to fill this form out to appoint a caregiver for a minor child or ward?"
@@ -242,6 +295,11 @@ fields:
     datatype: yesnoradio
     
 help: "A minor child or ward is under 18 years old "
+---
+# id: code_1791592424014
+# code: |
+#   children.there_are_any = True
+#   
 ---
 id: not_eligible
 question: "This Interview Cannot Continue "
@@ -264,15 +322,26 @@ event: not_eligible
 #     datatype: area
 ---
 id: Caregiver Info
-question: |
-  Parties Information
-subquestion: Provide details about the caregiver.
+question: |2
+  Information about the Caregiver you wish to appoint
 fields:
-  - label: "Name:"
-    field: caregiver_name
-    input type: area
-  - "Home address:": caregiver_address
-  - "Phone number:": caregiver_phone_number
+  - code: |
+      caregivers[i].name_fields(show_suffix=False)
+
+  - code: |
+      caregivers[i].address_fields(show_country=False, show_county=False)
+
+  - Phone Number: caregiver_phone_number
+sets:
+  - "caregivers[i].name.first"
+  - "caregivers[i].name.last"
+  - "caregivers[i].name.middle"
+  - "caregivers[i].address.address"
+  - "caregivers[i].address.city"
+  - "caregivers[i].address.zip"
+  - "caregivers[i].address.unit"
+  - "caregivers[i].address.state"
+  - "caregivers[i].address.country"
 ---
 # id: children names
 # question: Children/ Ward Information
@@ -324,59 +393,75 @@ fields:
 #     show if: children4
 ---
 id: Alternate Attorney in Fact
-question: Alternate Attorney-in-Fact/Caregiver
-subquestion: In the event that the caregiver is unable or unwilling to act as attorney-in-fact name an alternate.
+question: "Information about Alternate Caregiver"
+subquestion: "Name an alternate caregiver in the event that ${caregivers[0].name.full()} is unable or unwilling."
 fields:
-  - label: "Name:"
-    field: caregiver2_name
-    input type: area
-  - "Address: ": caregiver2_address
+  - code: |
+      caregivers2[i].name_fields(show_suffix=False)
+
+  - code: |
+      caregivers2[i].address_fields(show_country=False, show_county=False)
+
   - "Phone Number:": caregiver2_phone_number
+sets:
+  - "caregivers2[i].name.first"
+  - "caregivers2[i].name.last"
+  - "caregivers2[i].name.middle"
+  - "caregivers2[i].address.address"
+  - "caregivers2[i].address.city"
+  - "caregivers2[i].address.zip"
+  - "caregivers2[i].address.unit"
+  - "caregivers2[i].address.state"
+  - "caregivers2[i].address.country"
+---
+id: code_1791662608628
+code: |
+  caregiver2_name = caregivers2[0].name.full()
+  caregiver2_address = caregivers2[0].address.on_one_line()
+  
 ---
 id: Delegated Powers
-question: |
-  Delegated Powers
-subquestion: Specify the powers being delegated to the Caregiver
+question: |2
+  Which powers do you wish to give to the Caregiver?
 fields:
-  - label: "Caregiving power "
+  - label: "Caregiving Power "
     field: power_caregiving_yes
     datatype: yesno
-    help: "Temporary care-giving authority for the child(ren)/ward(s), until such time as the child(ren)/ward(s) is/are returned to our/my physical custody, or his/her/their custody status is altered by a federal, state, or local agency; or changed by a court of law."
-  - label: Well-being power
+    help: Temporary care-giving power over the child(ren) or ward(s)
+  - label: Well-Being Power
     field: power_wellbeing_yes
     datatype: yesno
-    help: "Power to provide for the physical and mental well-being of the child(ren)/ward(s), including but not limited to providing food and shelter."
-  - label: "Education power "
+    help: Power to provide for the physical and mental well-being of the child(ren) or ward(s) (i.e. providing food and shelter)
+  - label: "Education Power "
     field: power_education_yes
     datatype: yesno
-    help: "The authority to enroll the child(ren)/ward(s) in the appropriate educational institutions; obtain access to his/her/their school records; authorize his/her/their participation in school activities; and make any and all decisions related to his/her/their education, including, but not limited to, those related to special education."
-  - label: Healthcare power
+    help: "Power to enroll the child(ren) or ward(s) in the appropriate schools; to access school records; to authorize participation in school activities; and to make any and all decisions related to education, including special education"
+  - label: Healthcare Power
     field: power_healthcare_yes
     datatype: yesno
-    help: "The authority, to the same extent that a parent/custodian/guardian would have the authority, to make medical, dental, and mental health decisions; to sign documents, waivers and releases required by a hospital or physician; to access medical, dental, or mental health records concerning the child(ren)/ward(s); to authorize his/her/their admission to or discharge from any hospital or medical care facility; to consult with any provider of health care; to consent to the provision, withholding, modification or withdrawal of any health care procedure; and to make other decisions related to the health care needs of the child(ren)/ward(s)."
-  - label: "Travel power "
+    help: "The power to make medical, dental, and mental health decisions; to sign documents, waivers and releases required by a hospital or physician; to access medical, dental, or mental health records; to authorize admission to or discharge from any hospital or medical care facility; to consult with any health care provider; to consent to the provision, withholding, modification or withdrawal of any health care procedure; and to make other decisions related to the health care needs of the child(ren) or ward(s)"
+  - label: "Travel Power "
     field: power_travel_yes
     datatype: yesno
-    help: "The authority to make travel arrangements on behalf of the child(ren)/ward(s) for destinations both inside and outside of the United States by air and/or ground transportation; to accompany the child(ren)/ward(s) on any such trips; and to make any and all related arrangements on behalf of the child(ren)/ward(s), including but not limited to hotel accommodations."
-  - label: "Financial power "
+    help: The power to make travel and all related arrangements for the child(ren) or ward(s) (i.e. hotel accommodations) both nationally and internationally; to join them on any such trips
+  - label: "Financial Power "
     field: power_financial_yes
     datatype: yesno
-    help: The power to handle any and all financial affairs and any and all personal and legal matters concerning the child(ren)/ward(s).
+    help: The power to handle financial decisions and personal and legal matters concerning the child(ren) or ward(s)
   - label: "All Other Powers "
     field: power_other_yes
     datatype: yesno
-    help: "The authority to handle and engage in any and all other matters relating to the care, custody, and property of the child or ward which are permitted pursuant to applicable State law."
+    help: "The power to handle and engage in any and all other matters relating to the care, custody, and property of the child or ward which are permitted pursuant to applicable State law"
 ---
 id: Triggering Events
-question: |
-  Triggering Events
-subquestion: Select the event(s) that will give authority to the caregiver.
+question: |2
+  What event(s) do you want to trigger the appointed powers?
 fields:
-  - The execution of this document on the latest date below: triggering_event_execution_yes
+  - The signing of this document: triggering_event_execution_yes
     datatype: yesno
-  - "My attending physician concludes that I am mentally incapacitated, and thus unable to care for my child(ren)/ ward(s)": triggering_event_mental_incapacity_yes
+  - I am mentally incapacitated and unable to care for my child(ren) or ward(s): triggering_event_mental_incapacity_yes
     datatype: yesno
-  - "My attending physician concludes that I am physically debilitated, and thus unable to care for my child(ren)/ ward(s)": triggering_event_physical_debilitation_yes
+  - I am physically debilitated and unable to care for my child(ren) or ward(s): triggering_event_physical_debilitation_yes
     datatype: yesno
   - "I am detained in immigration detention, removed, or deported": triggering_event_immigration_yes
     datatype: yesno
@@ -401,16 +486,15 @@ fields:
     
 ---
 id: question_1790192051493
-question: "Other Parent"
+question: "Will ${ other_parent[0].name.full() } sign?"
 fields:
-  - "Will ${ other_parent[0].name.full() } sign?": other_parent_will_sign
+  - no label: other_parent_will_sign
     datatype: yesnoradio
 ---
 id: Consent of Other Parent
 continue button field: other_parent_consent_screen
-question: |
-  Consent of Other Parent
-subquestion: "If ${ other_parent[0].name.full() }  does not consent and will not sign the form, please provide reasons for lack of consent below:"
+question: |2
+  Reason(s) why ${ other_parent[0].name.full() }  will not sign the form:
 fields:
   - "${ other_parent[0].name.full() }  is deceased": other_parent_deceased_yes
     datatype: yesno
@@ -418,19 +502,20 @@ fields:
     datatype: yesno
   - "${ other_parent[0].name.full() } is unable to consent": other_parent_unable_consent_yes
     datatype: yesno
-  - "${ other_parent[0].name.full() } is not involved": other_parent_not_involved_yes
+  - label: "${ other_parent[0].name.full() } is not involved"
+    field: other_parent_not_involved_yes
     datatype: yesno
+    help: for at least the last 2 years or 1/3 of the child’s life (whichever is less)
   - Other parent is unknown: other_parent_unknown_yes
     datatype: yesno
   - "${ other_parent[0].name.full() } is unreachable": other_parent_unreachable_yes
     datatype: yesno
-  - label: "Description of diligent efforts made if ${ other_parent[0].name.full() }  is unreachable "
+  - label: "Efforts made to reach  ${ other_parent[0].name.full() }  "
     field: users_diligent_efforts
     required: False
     show if: other_parent_unreachable_yes
     input type: area
-  - label: Other
-    field: other_parent_other_yes
+  - Other: other_parent_other_yes
     datatype: yesno
   - label: Other explanation
     field: other_parent_other_text
@@ -440,9 +525,8 @@ fields:
 ---
 id: alternate_consent
 continue button field: alternate_consent_screen
-question: |
-  Alternate consent
-subquestion: "Select all that apply"
+question: |2
+  Reason(s) why you have sole custody:
 fields:
   - Other parent does not have custody: other_parent_no_custody_yes
     datatype: yesno
@@ -488,57 +572,55 @@ comment: |
 #   - Date of Witness 2 signature: witnesses2_signature_date
 #     datatype: date
 ---
-id: caregivers names
-sets:
-  - caregivers[i].name.first
-  - caregivers[i].name.last
-  - caregivers[i].name.middle
-
-question: |
-  % if hasattr(caregivers, 'ask_number') and caregivers.ask_number and caregivers.target_number == 1:
-  Name of caregiver
-  % else:
-  Name of the ${ ordinal(i) } caregiver
-  % endif
-fields:
-  - code: |
-      caregivers[i].name_fields()
+# id: caregivers names
+# sets:
+#   - caregivers[i].name.first
+#   - caregivers[i].name.last
+#   - caregivers[i].name.middle
+#
+# question: |
+#   % if hasattr(caregivers, 'ask_number') and caregivers.ask_number and caregivers.target_number == 1:
+#   Name of caregiver
+#   % else:
+#   Name of the ${ ordinal(i) } caregiver
+#   % endif
+# fields:
+#   - code: |
+#       caregivers[i].name_fields()
 ---
-id: another caregiver
-question: |
-  Is there another caregiver to tell us about?
-fields:
-  - no label: caregivers.there_is_another
-    datatype: yesnoradio
+# id: another caregiver
+# question: |
+#   Is there another caregiver to tell us about?
+# fields:
+#   - no label: caregivers.there_is_another
+#     datatype: yesnoradio
 ---
-id: caregiver phone number
-question: |
-  What is ${ caregivers[i] }'s phone number?
-fields:
-  - Phone: caregivers[i].phone_number
-    datatype: al_international_phone
+# id: caregiver phone number
+# question: |
+#   What is ${ caregivers[i] }'s phone number?
+# fields:
+#   - Phone: caregivers[i].phone_number
+#     datatype: al_international_phone
 ---
-id: another child
-question: |
-  Is there another child to tell us about?
-fields:
-  - no label: children.there_is_another
-    datatype: yesnoradio
+# id: another child
+# question: |
+#   Is there another child to tell us about?
+# fields:
+#   - no label: children.there_is_another
+#     datatype: yesnoradio
 ---
 id: other parent names
-question: |
+question: |2
   % if hasattr(other_parent, 'ask_number') and other_parent.ask_number and other_parent.target_number == 1:
-  Name of other parent
+  Information about other parent, custodian or guardian
   % else:
   Name of the ${ ordinal(i) } other parent
   % endif
 fields:
   - code: |
-      other_parent[i].name_fields()
-  - label: Address
-    field: other_parent_address
-  - label: Phone Number
-    field: other_parent_phone_number
+      other_parent[i].name_fields(show_suffix=False) + other_parent[i].address_fields(default_state=AL_DEFAULT_STATE, show_country=False, show_county=False)
+
+  - Phone Number: other_parent_phone_number
 
 sets:
   - "other_parent[i].name.first"
@@ -569,7 +651,7 @@ question: |
   % endif
 fields:
   - code: |
-      users[i].name_fields() + users[i].address_fields(default_state=AL_DEFAULT_STATE, show_country=False, show_county=False)
+      users[i].name_fields(show_suffix=False) + users[i].address_fields(default_state=AL_DEFAULT_STATE, show_country=False, show_county=False)
   - Phone Number: users_phone_number
 ---
 id: witnesses names
@@ -666,29 +748,39 @@ sets:
   - children[i].name.last
   - children[i].name.middle
   - children[i].name.suffix
-question: |
+question: |2
   % if hasattr(children, 'ask_number') and children.ask_number and children.target_number == 1:
-  Name of child
+  Information about the child or ward
   % else:
-  Name of the ${ ordinal(i) } child
+  Information about the ${ ordinal(i) } child or ward
   % endif
 fields:
   - code: |
-      children[i].name_fields()
-  - label: Birthdate
-    field: children[i].birthdate
-    datatype: BirthDate
+      children[i].name_fields() + [
+        {
+          "label": word("Birthdate"),
+          "field": "children[i].birthdate",
+          "datatype": "BirthDate",
+        }
+      ]
 ---
 id: code_1791144921638
 code: |
-    children1_name = children[0].name.full() if len(children) > 0 else ''
-    children2_name = children[1].name.full() if len(children) > 1 else ''
-    children3_name = children[2].name.full() if len(children) > 2 else ''
-    children4_name = children[3].name.full() if len(children) > 3 else ''
-    children1_birthdate = children[0].birthdate if len(children) > 0 else ''
-    children2_birthdate = children[1].birthdate if len(children) > 1 else ''
-    children3_birthdate = children[2].birthdate if len(children) > 2 else ''
-    children4_birthdate = children[3].birthdate if len(children) > 3 else ''
+  #children code block
+  children1_name = children[0].name.full() if len(children) > 0 else ''
+  children2_name = children[1].name.full() if len(children) > 1 else ''
+  children3_name = children[2].name.full() if len(children) > 2 else ''
+  children4_name = children[3].name.full() if len(children) > 3 else ''
+  
+---
+id: code_1791672652717
+code: |
+  children1_birthdate = children[0].birthdate if len(children) > 0 else ''
+  children2_birthdate = children[1].birthdate if len(children) > 1 else ''
+  children3_birthdate = children[2].birthdate if len(children) > 2 else ''
+  children4_birthdate = children[3].birthdate if len(children) > 3 else ''
+  
+  
 ---
 id: preview nj_power_of_attorney_delegation_fillablewithfieldswithfields919
 question: |
