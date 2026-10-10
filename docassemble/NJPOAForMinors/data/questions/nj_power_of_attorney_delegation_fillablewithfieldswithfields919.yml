@@ -1,3 +1,8 @@
+id: code_1791587376371
+code: |
+  users_address = users[0].address.on_one_line()
+  
+---
 id: code_1791508172797
 code: |
   users_names = [users[0].name.full()]
@@ -131,6 +136,7 @@ code: |
   al_intro_screen
   nj_power_of_attorney_delegation_fillablewithfieldswithfields919_intro
   users.gather()
+  users_address = users[0].address.on_one_line()
   correct_form1
   if not correct_form1:
     event = 'not_eligible'
@@ -170,15 +176,15 @@ code: |
 ---
 id: NJ Power of Attorney Delegation Fillable with fields with fields9 19 intro
 continue button field: nj_power_of_attorney_delegation_fillablewithfieldswithfields919_intro
-question: "**NJ Temporary Power of Attorney Appointment of a Minor (Fillable Form)**"
+question: "NJ Temporary Power of Attorney Appointment of a Minor (Fillable Form)"
 subquestion: |2
-  Complete this form if you are a parent, custodian, or guardian in NJ wishing to temporarily give your parental powers of a minor child to someone else.
+  Complete this form if you are a parent, custodian, or guardian in NJ wishing to temporarily give your parental powers over a minor child or ward to someone else.
   
   ### Before you get started
-  - Collect basic information about the parents and guardians, the children, and the appointed caregivers.
+  - Collect basic information about the parents and guardians, the children or wards, and the caregivers you wish to appoint.
   
   ### When you are finished
-  - Sign the form in the presence of a notary, 2 witnesses and the other parent or guardian (if applicable).
+  - Sign the form in the presence of a notary, 2 witnesses and the other person you share custody with (if applicable).
   - Give a copy to the appointed caregiver and keep a copy for yourself.
   
   
@@ -230,14 +236,16 @@ fields:
       )
 ---
 id: question_1790896093586
-question: "Do you want to fill this form out for a minor child or ward (under 18)?"
+question: "Do you want to fill this form out to appoint a caregiver for a minor child or ward?"
 fields:
   - no label: correct_form1
     datatype: yesnoradio
+    
+help: "A minor child or ward is under 18 years old "
 ---
 id: not_eligible
-question: "This interview cannot continue "
-subquestion: "This form handles delegation of temporary parental powers over minors in NJ. Based on your answers, this form may not be correct for you."
+question: "This Interview Cannot Continue "
+subquestion: "This form assists with appointment of temporary parental powers over minors in NJ. Based on your answers, this form may not be correct for you."
 event: not_eligible
 
 ---
@@ -540,10 +548,16 @@ sets:
 ---
 id: users names
 sets:
-  - users[i].name.first
-  - users[i].name.last
-
-
+  - "users[i].name.first"
+  - "users[i].name.last"
+  - "users[i].name.middle"
+  - "users[i].name.suffix"
+  - users_address.address.address
+  - users_address.address.city
+  - users_address.address.zip
+  - users_address.address.unit
+  - users_address.address.state
+  - users_address.address.country
 question: |
   % if i == 0 and al_person_answering == "user":
   Tell us about yourself
@@ -555,11 +569,8 @@ question: |
   % endif
 fields:
   - code: |
-      users[i].name_fields()
-  - label: Address
-    field: users_address
-  - label: Phone Number
-    field: users_phone_number
+      users[i].name_fields() + users[i].address_fields(default_state=AL_DEFAULT_STATE, show_country=False, show_county=False)
+  - Phone Number: users_phone_number
 ---
 id: witnesses names
 sets:
@@ -665,34 +676,19 @@ fields:
   - code: |
       children[i].name_fields()
   - label: Birthdate
-    field: children1_birthdate
-    show if:
-      code: |
-        i == 0
-  - label: Birthdate
-    field: children2_birthdate
-    show if:
-      code: |
-        i == 1
-  - label: Birthdate
-    field: children3_birthdate
-    show if:
-      code: |
-        i == 2
-  - label: Birthdate
-    field: children4_birthdate
-    show if:
-      code: |
-        i == 3
-  
+    field: children[i].birthdate
+    datatype: BirthDate
 ---
 id: code_1791144921638
 code: |
-  children1_name = children[0].name.full() if len(children) > 0 else ''
-  children2_name = children[1].name.full() if len(children) > 1 else ''
-  children3_name = children[2].name.full() if len(children) > 2 else ''
-  children4_name = children[3].name.full() if len(children) > 3 else ''
-  
+    children1_name = children[0].name.full() if len(children) > 0 else ''
+    children2_name = children[1].name.full() if len(children) > 1 else ''
+    children3_name = children[2].name.full() if len(children) > 2 else ''
+    children4_name = children[3].name.full() if len(children) > 3 else ''
+    children1_birthdate = children[0].birthdate if len(children) > 0 else ''
+    children2_birthdate = children[1].birthdate if len(children) > 1 else ''
+    children3_birthdate = children[2].birthdate if len(children) > 2 else ''
+    children4_birthdate = children[3].birthdate if len(children) > 3 else ''
 ---
 id: preview nj_power_of_attorney_delegation_fillablewithfieldswithfields919
 question: |
@@ -1133,12 +1129,22 @@ progress: 100
 # ALDocument objects specify the metadata for each template
 objects:
   - nj_power_of_attorney_delegation_fillablewithfieldswithfields919_Post_interview_instructions: ALDocument.using(filename="nj_power_of_attorney_delegation_fillablewithfieldswithfields919_next_steps.docx", title="Next steps", enabled=al_next_steps_enabled, has_addendum=False)
-  - nj_power_of_attorney_delegation_fillablewithfieldswithfields919_attachment: ALDocument.using(filename="nj_power_of_attorney_delegation_fillablewithfieldswithfields919", title="Power of Attorney", enabled=True, has_addendum=False)
+  - nj_power_of_attorney_delegation_fillablewithfieldswithfields919_attachment: ALDocument.using(filename="nj_power_of_attorney_delegation_fillablewithfieldswithfields919", title="Power of Attorney", enabled=True, has_addendum=True)
 ---
 # Bundles group the ALDocuments into separate downloads, such as for court and for the user
 objects:
   - al_user_bundle: ALDocumentBundle.using(elements=[nj_power_of_attorney_delegation_fillablewithfieldswithfields919_Post_interview_instructions, nj_power_of_attorney_delegation_fillablewithfieldswithfields919_attachment], filename="nj_power_of_attorney_delegation_fillablewithfieldswithfields919", title="All documents", enabled=True)
   - al_recipient_bundle: ALDocumentBundle.using(elements=[nj_power_of_attorney_delegation_fillablewithfieldswithfields919_attachment], filename="nj_power_of_attorney_delegation_fillablewithfieldswithfields919",  title="All documents", enabled=True)
+---
+code: |
+  nj_power_of_attorney_delegation_fillablewithfieldswithfields919_attachment.overflow_fields.initializeObject('children', ALAddendumField, field_name='children')
+  nj_power_of_attorney_delegation_fillablewithfieldswithfields919_attachment.overflow_fields['children'].overflow_trigger = 4
+  nj_power_of_attorney_delegation_fillablewithfieldswithfields919_attachment.overflow_fields['children'].label = "Additional Children"
+  nj_power_of_attorney_delegation_fillablewithfieldswithfields919_attachment.overflow_fields['children'].headers = [
+    {"name": "Name"},
+    {"birthdate": "Birthdate"},
+  ]
+  nj_power_of_attorney_delegation_fillablewithfieldswithfields919_attachment.overflow_fields.gathered = True
 ---
 template: nj_power_of_attorney_delegation_fillablewithfieldswithfields919_Post_interview_instructions.title
 content: |
