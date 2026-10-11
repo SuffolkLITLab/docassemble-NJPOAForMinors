@@ -197,66 +197,6 @@ subquestion: |2
   More questions? Ask here: **Add AskLit**
 
 ---
-# id: user address
-# sets:
-#   - users[i].address.address
-#   - users[i].address.city
-#   - users[i].address.state
-#   - users[i].address.zip
-#   - users[i].address.unit
-#   - users[i].address.country
-# question: |
-#   % if i == 0 and al_person_answering == "user":
-#   What is your address?
-#   % else:
-#   What is ${ users[i] }'s address?
-#   % endif
-# fields:
-#   - label: |
-#       % if i > 0 and al_person_answering == "user":
-#       Same as your address
-#       % else:
-#       Same as ${ users[0] }'s address
-#       % endif
-#     field: users[i].address
-#     datatype: object_radio
-#     choices:
-#       - users[0].address if defined("users[0].address.address") else None
-#     object labeler: |
-#       lambda y: y.on_one_line()
-#     none of the above: |
-#       Somewhere else
-#     disable others: True
-#     show if:
-#       code: |
-#         i > 0 and defined("users[0].address.address")
-#   - code: |
-#       users[i].address_fields(
-#           country_code=AL_DEFAULT_COUNTRY, default_state=AL_DEFAULT_STATE
-#       )
----
-# id: child birthdate
-# question: |
-#   When was ${ children[i] } born?
-# fields:
-#   - Birthdate: children[i].birthdate
-#     datatype: BirthDate
-#     alMonthLabel: ${ word('Month') }
-#     alDayLabel: ${ word('Day') }
-#     alYearLabel: ${ word('Year') }
----
-# id: any other parent
-# question: |
-#   Do you know who the other parent is?
-# fields:
-#   - no label: other_parent.there_are_any
-#     datatype: yesnoradio
----
-# id: code_1791154347252
-# code: |
-#   other_parent_unknown_yes = len(other_parent) == 0
-#   
----
 id: number of children or wards
 question: "How many children or wards are you appointing a caregiver for?"
 fields:
@@ -264,29 +204,7 @@ fields:
     datatype: integer
     min: 1
     default: 1
----
-# id: any users
-# question: |
-#   Will this form include any users?
-# fields:
-#   - no label: users.there_are_any
-#     datatype: yesnoradio
----
-# id: witness address
-# sets:
-#   - witnesses[i].address.address
-#   - witnesses[i].address.city
-#   - witnesses[i].address.state
-#   - witnesses[i].address.zip
-#   - witnesses[i].address.unit
-#   - witnesses[i].address.country
-# question: |
-#   What is ${ witnesses[i].possessive('address') }?
-# fields:
-#   - code: |
-#       witnesses[i].address_fields(
-#           country_code=AL_DEFAULT_COUNTRY, default_state=AL_DEFAULT_STATE
-#       )
+
 ---
 id: question_1790896093586
 question: "Do you want to fill this form out to appoint a caregiver for a minor child or ward?"
@@ -296,30 +214,12 @@ fields:
     
 help: "A minor child or ward is under 18 years old "
 ---
-# id: code_1791592424014
-# code: |
-#   children.there_are_any = True
-#   
----
+
 id: not_eligible
 question: "This Interview Cannot Continue "
 subquestion: "This form assists with appointment of temporary parental powers over minors in NJ. Based on your answers, this form may not be correct for you."
 event: not_eligible
 
----
-# id: Parties Information
-# question: |
-#   Parties Information
-# subquestion: "Provide details about the parent(s), custodian(s), or guardian(s). Separate each person with a comma."
-# fields:
-#   - "Name(s):": users_names
-#     datatype: area
-#   - label: "Address(es):"
-#     field: users_addresses
-#     datatype: area
-#     input type: area
-#   - "Phone number(s):": users_phone_numbers
-#     datatype: area
 ---
 id: Caregiver Info
 question: |2
@@ -343,55 +243,7 @@ sets:
   - "caregivers[i].address.state"
   - "caregivers[i].address.country"
 ---
-# id: children names
-# question: Children/ Ward Information
-# subquestion: Provide your child’s/ward’s name and date of birth
-# fields:
-#   - "Name:": children1_name
-#   - "Date of Birth:": children1_birthdate
-#     datatype: BirthDate
-#   - label: Add another child
-#     field: children2
-#     datatype: yesno
-#     required: False
-#   - label: "Name:"
-#     field: children2_name
-#     required: False
-#     show if: children2
-#   - label: Date of Birth
-#     field: children2_birthdate
-#     datatype: BirthDate
-#     required: False
-#     show if: children2
-#   - label: Add another child
-#     field: children3
-#     datatype: yesno
-#     required: False
-#     show if: children2
-#   - label: "Name:"
-#     field: children3_name
-#     required: False
-#     show if: children3
-#   - label: "Date of Birth:"
-#     field: children3_birthdate
-#     datatype: BirthDate
-#     required: False
-#     show if: children3
-#   - label: Add another child
-#     field: children4
-#     datatype: yesno
-#     required: False
-#     show if: children3
-#   - label: "Name:"
-#     field: children4_name
-#     required: False
-#     show if: children4
-#   - label: "Date of Birth:"
-#     field: children4_birthdate
-#     datatype: BirthDate
-#     required: False
-#     show if: children4
----
+
 id: Alternate Attorney in Fact
 question: "Information about Alternate Caregiver"
 subquestion: "Name an alternate caregiver in the event that ${caregivers[0].name.full()} is unable or unwilling."
@@ -472,12 +324,7 @@ fields:
   - Upon my death: triggering_event_death_yes
     datatype: yesno
 ---
-# id: other_parent_known
-# question: "Do you know who the other parent is or share custody with anyone?"
-# fields:
-#   - no label: other_parent_known
-#     datatype: yesnoradio
----
+
 id: question_1791498080632
 question: "Do you share custody with anyone?"
 fields:
@@ -540,74 +387,7 @@ comment: |
   ql_baseline.yml, rewritten to name this interview's own objects instead of the
   generic `x`. Edit them freely: they replace the AssemblyLine versions. Delete
   one to go back to the AssemblyLine wording.
----
-# id: Signatures
-# question: |
-#   Signatures
-# subquestion: |
-#   Collect signatures and dates from the involved parties and witnesses.
-# fields:
-#   - label: "Parent, Custodian or Guardian signature"
-#     field: users_signature
-#     required: False
-#   - "Date of Parent, Custodian or Guardian signature": users_signature_date
-#     datatype: date
-#   - label: "Other Parent's signature"
-#     field: other_parent_signature
-#     required: False
-#     input type: area
-#   - "Date of Other Parent's signature": other_parent_signature_date
-#     datatype: date
-#   - label: "Witness 1 signature "
-#     field: witnesses1_signature
-#     required: False
-#     input type: area
-#   - "Witness 1 Address ": witnesses1_address
-#   - "Date of Witness 1 signature ": witnesses1_signature_date
-#     datatype: date
-#   - label: Witness 2 signature
-#     field: witnesses2_signature
-#     required: False
-#   - Witness 2 Address: witnesses2_address
-#   - Date of Witness 2 signature: witnesses2_signature_date
-#     datatype: date
----
-# id: caregivers names
-# sets:
-#   - caregivers[i].name.first
-#   - caregivers[i].name.last
-#   - caregivers[i].name.middle
-#
-# question: |
-#   % if hasattr(caregivers, 'ask_number') and caregivers.ask_number and caregivers.target_number == 1:
-#   Name of caregiver
-#   % else:
-#   Name of the ${ ordinal(i) } caregiver
-#   % endif
-# fields:
-#   - code: |
-#       caregivers[i].name_fields()
----
-# id: another caregiver
-# question: |
-#   Is there another caregiver to tell us about?
-# fields:
-#   - no label: caregivers.there_is_another
-#     datatype: yesnoradio
----
-# id: caregiver phone number
-# question: |
-#   What is ${ caregivers[i] }'s phone number?
-# fields:
-#   - Phone: caregivers[i].phone_number
-#     datatype: al_international_phone
----
-# id: another child
-# question: |
-#   Is there another child to tell us about?
-# fields:
-#   - no label: children.there_is_another
-#     datatype: yesnoradio
+
 ---
 id: other parent names
 question: |2
@@ -679,13 +459,7 @@ fields:
     show if:
       code: |
         i == 1
----
-# id: question_1790364611294
-# question: |
-#   Witness ${ ordinal(i) }, please sign
-#   signature: witnesses[i].signature
-# fields:
-#   - New field: new_field_1790364611294
+
 ---
 id: another witness
 question: |
@@ -704,26 +478,7 @@ question: |2
 fields:
   - "Select One:": sign_now
     datatype: yesnoradio
----
-# id: signature dates
-# question: |
-#   Signature Dates
-# subquestion: |
-#  Enter the date on which each person signed the document.
-# fields:
-#   - "${ users[0].name.full() } ": users_signature_date
-#     datatype: date
-#
-#   - label: "${ other_parent[0].name.full() } "
-#     field: other_parent_signature_date
-#     datatype: date
-#     show if: "{\"code\":other_parent_known and other_parent_will_sign}"
-#
-#   - "${witnesses[0].name.full() } ": witnesses1_signature_date
-#     datatype: date
-#
-#   - "${witnesses[1].name.full() } ": witnesses2_signature_date
-#     datatype: date
+
 ---
 id: code_1791484735545
 code: |
@@ -735,12 +490,7 @@ code: |
     other_parent_signature_date = today()
   
       
-  
----
-id: children names
-question: ""
-fields:
-  - New field: new_field_1791050233015
+
 ---
 id: children names 1
 sets:
@@ -755,13 +505,13 @@ question: |2
   Information about the ${ ordinal(i) } child or ward
   % endif
 fields:
-  - code: |
-      children[i].name_fields() + [
-        {
-          "label": word("Birthdate"),
-          "field": "children[i].birthdate",
-          "datatype": "BirthDate",
-        }
+  - code: |      
+      children[i].name_fields() + [       
+        {          
+          "label": word("Birthdate"),          
+          "field": "children[i].birthdate",          
+          "datatype": "BirthDate",        
+        }      
       ]
 ---
 id: code_1791144921638
@@ -775,11 +525,10 @@ code: |
 ---
 id: code_1791672652717
 code: |
-  children1_birthdate = children[0].birthdate if len(children) > 0 else ''
-  children2_birthdate = children[1].birthdate if len(children) > 1 else ''
-  children3_birthdate = children[2].birthdate if len(children) > 2 else ''
-  children4_birthdate = children[3].birthdate if len(children) > 3 else ''
-  
+  children1_birthdate = children[0].birthdate.format() if len(children) > 0 else ''
+  children2_birthdate = children[1].birthdate.format()  if len(children) > 1 else ''
+  children3_birthdate = children[2].birthdate.format()  if len(children) > 2 else ''
+  children4_birthdate = children[3].birthdate.format()  if len(children) > 3 else ''
   
 ---
 id: preview nj_power_of_attorney_delegation_fillablewithfieldswithfields919
