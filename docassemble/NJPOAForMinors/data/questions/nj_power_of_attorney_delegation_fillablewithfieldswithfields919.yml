@@ -26,6 +26,7 @@ code: |
 include:
   - docassemble.AssemblyLine:assembly_line.yml
   - docassemble.ALAnyState:any_state.yml
+  - docassemble.ALToolbox:collapse_template.yml
 ---
 metadata:
   title: >-
@@ -102,20 +103,35 @@ code: |
 id: alweaver assemblyline settings
 initial: True
 code: |
-  # These exact-name variables drive the reusable next-steps DOCX shell and
-  # are editable in Weaver's AssemblyLine settings panel.
+  # Managed by the graphical AssemblyLine settings editor.
+  allowed_courts = []
+  AL_ORGANIZATION_TITLE = ''
+  AL_ORGANIZATION_HOMEPAGE = ''
+  AL_DEFAULT_LANGUAGE = 'en'
+  AL_DEFAULT_OVERFLOW_MESSAGE = '...'
+  user_ask_role = 'unknown'
+  al_person_answering = 'user'
+  al_form_requires_digital_signature = False
+  al_typed_signature_prefix = '/s/'
+  al_typed_signature_font = ''
+  speak_text = True
+  enable_al_language = True
+  al_user_default_language = 'en'
+  al_interview_languages = ['en']
+  github_user = ''
   al_next_steps_enabled = True
-  al_next_steps_intro_prompt = 'Delegate authority for your child’s care'
-  al_next_steps_title = 'NJ Power of Attorney Delegation Fillable-with-fields-with-fields9-19'
   al_next_steps_document_title = 'Power of Attorney'
-  al_next_steps_document_purpose = 'Delegation'
+  al_next_steps_document_purpose = 'Appointment of Parental Powers'
   al_next_steps_help_organization = ''
   al_next_steps_help_url = 'https://pub.njleg.gov/bills/2020/A5000/4640_I1.HTM'
   al_next_steps_generate_qr_code = False
-  al_next_steps_what_happens_next = 'After completing the form, ensure that the attorney-in-fact understands their responsibilities. Keep a copy for your records and provide one to the designated caregiver.'
+  al_next_steps_what_happens_next = 'After completing the form, talk to the caregiver about their responsibilities. Keep a copy for your records and give one to the designated caregiver.'
   al_next_steps_what_can_decision_maker_do = 'The decision-maker can manage day-to-day care, make medical decisions, and handle educational needs for the child. They will act in the best interest of the child during the delegation period.'
   al_next_steps_what_happens_if_i_win = 'If the delegation is successful, the child will receive the necessary care and support while you are unable to provide it. You can revoke the delegation at any time if circumstances change.'
-  al_form_requires_digital_signature = False
+  # AL_DEFAULT_COUNTRY is set in one of your own code blocks, not here.
+  # AL_DEFAULT_STATE is set in one of your own code blocks, not here.
+  # al_form_type is set in one of your own code blocks, not here.
+  # github_repo_name is set in one of your own code blocks, not here.
 ---
 objects:
   - caregivers: "ALPeopleList.using(ask_number=True, target_number=1)"
@@ -184,7 +200,7 @@ id: NJ Power of Attorney Delegation Fillable with fields with fields9 19 intro
 continue button field: nj_power_of_attorney_delegation_fillablewithfieldswithfields919_intro
 question: "NJ Temporary Power of Attorney Appointment of a Minor (Fillable Form)"
 subquestion: |2
-  Complete this form if you are a parent, custodian, or guardian in NJ wishing to temporarily give your parental powers over a minor child or ward to someone else.
+  Fill out this form if you are a parent, custodian, or guardian in NJ wishing to temporarily give your parental powers over a minor child or ward to someone else.
   
   ### Before you get started
   - Collect basic information about the parents and guardians, the children or wards, and the caregivers you wish to appoint.
@@ -193,8 +209,6 @@ subquestion: |2
   - Sign the form in the presence of a notary, 2 witnesses and the other person you share custody with (if applicable).
   - Give a copy to the appointed caregiver and keep a copy for yourself.
   
-  
-  More questions? Ask here: **Add AskLit**
 
 ---
 id: number of children or wards
@@ -208,11 +222,16 @@ fields:
 ---
 id: question_1790896093586
 question: "Do you want to fill this form out to appoint a caregiver for a minor child or ward?"
+subquestion: 
+  ${ collapse_template(minor_explanation) }
 fields:
   - no label: correct_form1
     datatype: yesnoradio
     
-help: "A minor child or ward is under 18 years old "
+---
+template: help_text_1791844930907
+subject: "More information"
+content: "Add the help text here."
 ---
 
 id: not_eligible
@@ -246,7 +265,7 @@ sets:
 
 id: Alternate Attorney in Fact
 question: "Information about Alternate Caregiver"
-subquestion: "Name an alternate caregiver in the event that ${caregivers[0].name.full()} is unable or unwilling."
+subquestion: "Name an alternate caregiver if ${caregivers[0].name.full()} is unable or unwilling."
 fields:
   - code: |
       caregivers2[i].name_fields(show_suffix=False)
@@ -283,15 +302,15 @@ fields:
   - label: Well-Being Power
     field: power_wellbeing_yes
     datatype: yesno
-    help: Power to provide for the physical and mental well-being of the child(ren) or ward(s) (i.e. providing food and shelter)
+    help: Power to give physical and mental well-being of the child(ren) or ward(s) (i.e. giving food and shelter)
   - label: "Education Power "
     field: power_education_yes
     datatype: yesno
-    help: "Power to enroll the child(ren) or ward(s) in the appropriate schools; to access school records; to authorize participation in school activities; and to make any and all decisions related to education, including special education"
+    help: "Power to enroll the child(ren) or ward(s) in suitable schools; to access school records; to authorize participation in school activities; and to make any and all decisions related to education, including special education"
   - label: Healthcare Power
     field: power_healthcare_yes
     datatype: yesno
-    help: "The power to make medical, dental, and mental health decisions; to sign documents, waivers and releases required by a hospital or physician; to access medical, dental, or mental health records; to authorize admission to or discharge from any hospital or medical care facility; to consult with any health care provider; to consent to the provision, withholding, modification or withdrawal of any health care procedure; and to make other decisions related to the health care needs of the child(ren) or ward(s)"
+    help: "The power to make medical, dental, and mental health decisions; to sign documents, waivers and releases required by a hospital or physician; to access medical, dental, or mental health records; to authorize admission to or discharge from any hospital or medical care facility; to meet with any health care provider; to consent to the provision, withholding, change or withdrawal of any health care procedure; and to make other decisions related to the health care needs of the child(ren) or ward(s)"
   - label: "Travel Power "
     field: power_travel_yes
     datatype: yesno
@@ -299,11 +318,11 @@ fields:
   - label: "Financial Power "
     field: power_financial_yes
     datatype: yesno
-    help: The power to handle financial decisions and personal and legal matters concerning the child(ren) or ward(s)
+    help: The power to handle financial decisions and personal and legal matters about the child(ren) or ward(s)
   - label: "All Other Powers "
     field: power_other_yes
     datatype: yesno
-    help: "The power to handle and engage in any and all other matters relating to the care, custody, and property of the child or ward which are permitted pursuant to applicable State law"
+    help: "The power to handle and engage in any and all other matters relating to the care, custody, and property of the child or ward which are allowed by applicable State law"
 ---
 id: Triggering Events
 question: |2
@@ -473,7 +492,7 @@ question: |2
   % endif
   and want to sign this document electronically?
 fields:
-  - "Select One:": sign_now
+  - no label: sign_now
     datatype: yesnoradio
 
 ---
@@ -989,9 +1008,14 @@ template: nj_power_of_attorney_delegation_fillablewithfieldswithfields919_attach
 content: |
   NJ Power of Attorney Delegation Fillable-with-fields-with-fields9-19
 ---
-template: al_user_bundle.title
+template: minor_explanation
+subject: definition of a minor
 content: |
-  All forms to download for your records
+  A minor child or ward is under 18 years old
+---
+template: help_text_1791844981373
+subject: "More information"
+content: "Add the help text here."
 ---
 template: al_recipient_bundle.title
 content: |
