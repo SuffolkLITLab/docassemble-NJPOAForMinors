@@ -1,10 +1,68 @@
 
-
+include:
+  - docassemble.AssemblyLine:assembly_line.yml
+  - docassemble.ALAnyState:any_state.yml
+  - docassemble.ALToolbox:collapse_template.yml
+---
 id: code_1791660512243
 code: |
   caregiver_name = [caregivers[0].name.full()]
   caregiver_address = [caregivers[0].address.on_one_line()]
   
+---
+id: cautionary message adult child
+question: Check the child's age
+subquestion: |2
+  The birthdate you entered indicates that this child
+  or ward is older than 18.
+  
+  This form is intended for appointing a caregiver for
+  a minor. Please review the child's information before
+  continuing.
+field: adult_child_action
+buttons:
+  - Edit this child's information: edit
+  - Restart (re-enter number of children): restart_children
+  - Exit interview: exit
+
+---
+id: user address
+sets:
+  - users[i].address.address
+  - users[i].address.city
+  - users[i].address.state
+  - users[i].address.zip
+  - users[i].address.unit
+  - users[i].address.country
+question: |
+  % if i == 0 and al_person_answering == "user":
+  What is your address?
+  % else:
+  What is ${ users[i] }'s address?
+  % endif
+fields:
+  - label: |
+      % if i > 0 and al_person_answering == "user":
+      Same as your address
+      % else:
+      Same as ${ users[0] }'s address
+      % endif
+    field: users[i].address
+    datatype: object_radio
+    choices:
+      - users[0].address if defined("users[0].address.address") else None
+    object labeler: |
+      lambda y: y.on_one_line()
+    none of the above: |
+      Somewhere else
+    disable others: True
+    show if:
+      code: |
+        i > 0 and defined("users[0].address.address")
+  - code: |
+      users[i].address_fields(
+          country_code=AL_DEFAULT_COUNTRY, default_state=AL_DEFAULT_STATE
+      )
 ---
 #id: code_1791587376371
 #code: |
@@ -16,7 +74,7 @@ id: code_1791508172797
 code: |
   users_names = users[0].name.full()
   users_addresses = users[0].address.on_one_line()
-  users_phone_numbers = users[0].phone_number
+  users_phone_numbers = users[0].phone
 
   if share_custody:
     users_names += " and " + other_parent[0].name.full()
@@ -25,11 +83,7 @@ code: |
 
   
 ---
-include:
-  - docassemble.AssemblyLine:assembly_line.yml
-  - docassemble.ALAnyState:any_state.yml
-  - docassemble.ALToolbox:collapse_template.yml
----
+
 metadata:
   title: >-
     NJ Temporary Power of Attorney Appointment of a Minor 
@@ -138,7 +192,7 @@ code: |
 objects:
   - caregivers: "ALPeopleList.using(ask_number=True, target_number=1)"
   - caregivers2: "ALPeopleList.using(ask_number=True, target_number=1)"
-  - children: "ALPeopleList.using(ask_number=True, minimum_number=1)"
+  - children: "ALPeopleList.using(ask_number=True, minimum_number=1, complete_attribute='age_checked')"
   - other_parent: "ALPeopleList.using(ask_number=True, target_number=1)"
   - users: "ALPeopleList.using(ask_number=True, target_number=1)"
   - witnesses: "ALPeopleList.using(ask_number=True, target_number=2)"
@@ -156,19 +210,15 @@ comment: |
 id: interview_order_nj_power_of_attorney_delegation_fillablewithfieldswithfields919
 mandatory: True
 code: |
-  nav.set_section('intro')
   al_intro_screen
   nj_power_of_attorney_delegation_fillablewithfieldswithfields919_intro
+  screen
   users.gather()
+  nav.set_section('intro')
   users_address = users[0].address.on_one_line()
-  correct_form1
-  if not correct_form1:
-    event = 'not_eligible'
-    force_ask('not_eligible')
-    exit
+  users[0].phone
   nav.set_section('parties')
-  children.target_number
-  children.gather()
+  children_confirmed
   share_custody
   if share_custody:
     other_parent.gather()
@@ -221,6 +271,15 @@ question: "Are you a parent, guardian or custodian?"
 fields:
   - no label: screen
     datatype: yesnoradio
+---
+id: your contact information
+question: |
+  What is your phone number?
+fields:
+  - label: Phone number
+    field: "users[0].phone"
+    datatype: al_international_phone
+    required: False
 ---
 id: number of children or wards
 question: "How many children or wards are you appointing a caregiver for?"
@@ -362,7 +421,7 @@ fields:
     
 ---
 id: question_1790192051493
-question: "Will ${ other_parent[0].name.full() } sign?"
+question: "Will ${ other_parent[0].name.familiar() } sign?"
 fields:
   - no label: other_parent_will_sign
     datatype: yesnoradio
@@ -446,19 +505,13 @@ sets:
 ---
 id: users names
 sets:
-  - users_address.address.address
-  - users_address.address.city
-  - users_address.address.zip
-  - users_address.address.unit
-  - users_address.address.state
-  - users_address.address.country
   - "users[i].name.first"
   - "users[i].name.last"
   - "users[i].name.middle"
   - "users[i].name.suffix"
 question: |
   % if i == 0 and al_person_answering == "user":
-  Tell us about yourself
+  What is your full legal name?
   % elif al_form_type in ['starts_case', 'existing_case', 'appeal']:
   Who is the ${ ordinal(i) } person on your side of the case?
   % else:
@@ -467,8 +520,14 @@ question: |
   % endif
 fields:
   - code: |
-      users[i].name_fields(show_suffix=False) + users[i].address_fields(default_state=AL_DEFAULT_STATE, show_country=False, show_county=False)
-  - Phone number: "users[i].phone_number"
+      users[i].name_fields(show_suffix=False) 
+---
+id: question_1792792844193
+question: ""
+subquestion: |
+  
+fields:
+  - New field: new_field_1792792844193
 ---
 id: witnesses names
 sets:
@@ -538,11 +597,50 @@ question: |2
   ${ capitalize(ordinal(i)) } Child or Ward
   % endif
 fields:
-  - code: |      
+  - code: |
       children[i].name_fields(show_suffix=False)
   - Birthdate: "children[i].birthdate"
     datatype: BirthDate
+---
+id: check child age
+sets:
+  - children[i].age_checked
+code: |
+  children[i].name.first
+  children[i].birthdate
+  while children[i].birthdate <= today().minus(years=18):
+    adult_child_action
+    if adult_child_action == 'exit':
+      command('exit')
+    elif adult_child_action == 'restart_children':
+      undefine('adult_child_action')
+      # setattr avoids docassemble thinking this block defines target_number
+      setattr(children, 'target_number', i + 1)
+      setattr(children, 'restart_requested', True)
+      break
+    else:  # 'edit': re-ask this child's name and birthdate
+      undefine('adult_child_action')
+      undefine('children[i].name.first')
+      undefine('children[i].birthdate')
+      children[i].name.first
+      children[i].birthdate
+  children[i].age_checked = True
 
+---
+id: gather children
+code: |
+  while True:
+    children.target_number
+    children.gather()
+    if getattr(children, 'restart_requested', False):
+      # Clear the flag first, then wipe the list so the count question is asked again
+      children.restart_requested = False
+      children.clear()
+      children.reset_gathered()
+      undefine('children.target_number')
+      continue
+    break
+  children_confirmed = True
 ---
 # id: code_1791144921638
 # code: |
