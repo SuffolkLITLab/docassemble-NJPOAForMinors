@@ -429,30 +429,28 @@ fields:
 id: Consent of Other Parent
 continue button field: other_parent_consent_screen
 question: |2
-  Reason(s) why ${ other_parent[0].name.full() }  will not sign the form:
+   ${ other_parent[0].name.familiar() } will not sign the form because they 
 fields:
-  - They are deceased: other_parent_deceased_yes
+  - are deceased: other_parent_deceased_yes
     datatype: yesno
-  - They do not have custody: other_parent_no_custody_yes
+  - do not have custody: other_parent_no_custody_yes
     datatype: yesno
-  - They are unable to consent: other_parent_unable_consent_yes
+  - are mentally or physically unable to consent: other_parent_unable_consent_yes
     datatype: yesno
-  - label: They are not involved
+  - label: have not raised or financially supported
     field: other_parent_not_involved_yes
     datatype: yesno
     help: for at least the last 2 years or 1/3 of the child’s life (whichever is less)
-  - They are unreachable: other_parent_unreachable_yes
+  - are unreachable: other_parent_unreachable_yes
     datatype: yesno
-  - label: "Efforts made to reach  ${ other_parent[0].name.full() }  "
+  - label: "Efforts made to reach  ${ other_parent[0].name.familiar() }  "
     field: users_diligent_efforts
     required: False
     show if: other_parent_unreachable_yes
     input type: area
-  - Other parent is unknown: other_parent_unknown_yes
+  - other: other_parent_other_yes
     datatype: yesno
-  - Other: other_parent_other_yes
-    datatype: yesno
-  - label: Other explanation
+  - label: other explanation
     field: other_parent_other_text
     input type: area
     required: False
@@ -461,13 +459,13 @@ fields:
 id: alternate_consent
 continue button field: alternate_consent_screen
 question: |2
-  Reason why you have sole custody:
+  I have sole custody, because the other parent
 fields:
-  - Other parent is unknown: other_parent_unknown_yes
+  - is unknown: other_parent_unknown_yes
     datatype: yesno
-  - Other parent does not have custody: other_parent_no_custody_yes
+  - does not have custody: other_parent_no_custody_yes
     datatype: yesno
-  - Other parent is deceased: other_parent_deceased_yes
+  - is deceased: other_parent_deceased_yes
     datatype: yesno
   - Other: other_parent_other_yes
     datatype: yesno
@@ -495,7 +493,9 @@ fields:
   - code: |
       other_parent[i].name_fields(show_suffix=False) + other_parent[i].address_fields(default_state=AL_DEFAULT_STATE, show_country=False, show_county=False)
 
-  - Phone number: other_parent[i].phone_number
+  - label: Phone number
+    field: other_parent[i].phone_number
+    datatype: al_international_phone
 
 sets:
   - "other_parent[i].name.first"
