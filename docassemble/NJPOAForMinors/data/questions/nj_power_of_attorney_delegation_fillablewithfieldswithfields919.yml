@@ -319,7 +319,9 @@ fields:
   - code: |
       caregivers[i].address_fields(show_country=False, show_county=False)
 
-  - Phone number: "caregivers[i].phone_number"
+  - label: Phone number
+    field: caregivers[i].phone_number
+    datatype: al_international_phone
 sets:
   - "caregivers[i].name.first"
   - "caregivers[i].name.last"
@@ -342,7 +344,9 @@ fields:
   - code: |
       caregivers2[i].address_fields(show_country=False, show_county=False)
 
-  - "Phone number:": caregivers2[i].phone_number 
+  - label: Phone number
+    field: caregivers2[i].phone_number
+    datatype: al_international_phone
 sets:
   - "caregivers2[i].name.first"
   - "caregivers2[i].name.last"
@@ -421,10 +425,18 @@ fields:
     
 ---
 id: question_1790192051493
-question: "Will ${ other_parent[0].name.familiar() } sign?"
+question: |
+  Will ${ other_parent[0].name.familiar() } sign?
+subquestion: |
+  ${ collapse_template(sign_information) }
 fields:
   - no label: other_parent_will_sign
     datatype: yesnoradio
+---
+template: sign_information
+subject: Help me decide
+content: |
+  When you share custody with someone, generally they must also sign this form. If you select no, you will be asked to select or write a reason or reasons why they will not sign. Some reasons include that the person is unreachable, cannot be located, unable to consent because of a disability, etc.
 ---
 id: Consent of Other Parent
 continue button field: other_parent_consent_screen
@@ -437,10 +449,12 @@ fields:
     datatype: yesno
   - are mentally or physically unable to consent: other_parent_unable_consent_yes
     datatype: yesno
-  - label: have not raised or financially supported
+  - label: have not raised or financially supported the child
     field: other_parent_not_involved_yes
     datatype: yesno
     help: for at least the last 2 years or 1/3 of the child’s life (whichever is less)
+  - cannot be located: other_parent_unknown_yes
+    datatype: yesno
   - are unreachable: other_parent_unreachable_yes
     datatype: yesno
   - label: "Efforts made to reach  ${ other_parent[0].name.familiar() }  "
@@ -521,13 +535,6 @@ question: |
 fields:
   - code: |
       users[i].name_fields(show_suffix=False) 
----
-id: question_1792792844193
-question: ""
-subquestion: |
-  
-fields:
-  - New field: new_field_1792792844193
 ---
 id: witnesses names
 sets:
