@@ -312,12 +312,15 @@ event: not_eligible
 ---
 id: Caregiver_info_screen
 continue button field: Caregiver_info_screen
-question: "Next screens"
+question: "Caregiver screens"
 subquestion: |2-
+  **Choosing a Caregiver**
   In the next few screens you will be asked to choose the person you want to take care of your child or ward. This person must be 18 years or older.
   
+  **Choosing an Alternate Caregiver**
   You will also be asked to chose an alternate, in case your first choice becomes unwilling or unable.
   
+  **Parental powers and timeline**
   You will then have a choice as to which parental powers you want to give them and when they will get those powers.
   
   The powers will last for one year from when you choose to give those powers. The powers can be renewed in yearly increments by following this process again. You can take back these powers at any point by telling the chosen caregiver.
@@ -379,36 +382,32 @@ code: |
 ---
 id: Delegated Powers
 question: |2
-  Which powers do you wish to give to the Caregiver?
+  I allow the Caregiver to
 fields:
-  - label: "Caregiving Power "
+  - label: "Watch the child for a short time  "
     field: power_caregiving_yes
     datatype: yesno
-    help: Temporary care-giving power over the child(ren) or ward(s)
-  - label: Well-Being Power
+    help: An example may be when you go on a vacation, this person will watch your kids
+  - label: "Care for the child's basic needs"
     field: power_wellbeing_yes
     datatype: yesno
-    help: Power to give physical and mental well-being of the child(ren) or ward(s) (i.e. giving food and shelter)
-  - label: "Education Power "
+    help: food, shelter, mental and physical safety, etc.
+  - label: Make education decisions
     field: power_education_yes
     datatype: yesno
-    help: "Power to enroll the child(ren) or ward(s) in suitable schools; to access school records; to authorize participation in school activities; and to make any and all decisions related to education, including special education"
-  - label: Healthcare Power
+    help: "enrollment, access to school records, sign permission slips, any and all decisions about school, including special education"
+  - label: "Make medical, dental, and mental health decisions"
     field: power_healthcare_yes
     datatype: yesno
-    help: "The power to make medical, dental, and mental health decisions; to sign documents, waivers and releases required by a hospital or physician; to access medical, dental, or mental health records; to authorize admission to or discharge from any hospital or medical care facility; to meet with any health care provider; to consent to the provision, withholding, change or withdrawal of any health care procedure; and to make other decisions related to the health care needs of the child(ren) or ward(s)"
-  - label: "Travel Power "
+    help: "Including signing of documents, waivers and releases, access to medical records, admitting or discharge from any hospital or medical care facility, meetings with any health care provider, consenting, withholding, changing or withdrawal of procedures."
+  - label: "Make travel and related decisions "
     field: power_travel_yes
     datatype: yesno
-    help: The power to make travel and all related arrangements for the child(ren) or ward(s) (i.e. hotel accommodations) both nationally and internationally; to join them on any such trips
-  - label: "Financial Power "
-    field: power_financial_yes
+    help: For example, hotel rooms. This applies to both national and international travel.
+  - "Make financial and legal decisions ": power_financial_yes
     datatype: yesno
-    help: The power to handle financial decisions and personal and legal matters about the child(ren) or ward(s)
-  - label: "All Other Powers "
-    field: power_other_yes
+  - "Make other decisions ": power_other_yes
     datatype: yesno
-    help: "The power to handle and engage in any and all other matters relating to the care, custody, and property of the child or ward which are allowed by applicable State law"
 ---
 id: Triggering Events
 question: |2
