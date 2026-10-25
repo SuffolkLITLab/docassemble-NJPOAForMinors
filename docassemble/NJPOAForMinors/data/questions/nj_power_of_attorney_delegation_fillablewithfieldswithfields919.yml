@@ -228,6 +228,7 @@ code: |
   else:
     alternate_consent_screen
   users_names
+  Caregiver_info_screen
   caregivers.gather()
   caregiver_name
   caregivers2.gather()
@@ -308,6 +309,18 @@ question: "This Interview Cannot Continue "
 subquestion: "This form assists with appointment of temporary parental powers for minors in NJ. Based on your answers, this form may not be correct for you."
 event: not_eligible
 
+---
+id: Caregiver_info_screen
+continue button field: Caregiver_info_screen
+question: "Next screens"
+subquestion: |2-
+  In the next few screens you will be asked to choose the person you want to take care of your child or ward. This person must be 18 years or older.
+  
+  You will also be asked to chose an alternate, in case your first choice becomes unwilling or unable.
+  
+  You will then have a choice as to which parental powers you want to give them and when they will get those powers.
+  
+  The powers will last for one year from when you choose to give those powers. The powers can be renewed in yearly increments by following this process again. You can take back these powers at any point by telling the chosen caregiver.
 ---
 id: Caregiver Info
 question: |2
