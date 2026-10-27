@@ -236,7 +236,9 @@ code: |
   nav.set_section('case_details')
   set_progress(25)
   power_caregiving_yes
-  triggering_event_execution_yes
+  when_powers_start
+  if later:
+    triggering_event_mental_incapacity_yes
   nav.set_section('review_nj_power_of_attorney_delegation_fillablewithfieldswithfields919')
   set_progress(50)
   nj_power_of_attorney_delegation_fillablewithfieldswithfields919_preview_question
@@ -382,51 +384,78 @@ code: |
 ---
 id: Delegated Powers
 question: |2
-  I allow the Caregiver to
+  % if share_custody and other_parent_will_sign:
+    We allow the Caregiver to
+    % else:
+    I allow the Caregiver to
+    % endif
 fields:
-  - label: "Watch the child for a short time  "
+  - label: "watch the child for a short time  "
     field: power_caregiving_yes
     datatype: yesno
-    help: An example may be when you go on a vacation, this person will watch your kids
-  - label: "Care for the child's basic needs"
+    help: "An example may be when you go on a vacation, this person will watch your children"
+  - label: "care for the child's basic needs"
     field: power_wellbeing_yes
     datatype: yesno
     help: food, shelter, mental and physical safety, etc.
-  - label: Make education decisions
+  - label: make education decisions
     field: power_education_yes
     datatype: yesno
     help: "enrollment, access to school records, sign permission slips, any and all decisions about school, including special education"
-  - label: "Make medical, dental, and mental health decisions"
+  - label: "make medical, dental, and mental health decisions"
     field: power_healthcare_yes
     datatype: yesno
     help: "Including signing of documents, waivers and releases, access to medical records, admitting or discharge from any hospital or medical care facility, meetings with any health care provider, consenting, withholding, changing or withdrawal of procedures."
-  - label: "Make travel and related decisions "
+  - label: "make travel and related decisions "
     field: power_travel_yes
     datatype: yesno
     help: For example, hotel rooms. This applies to both national and international travel.
-  - "Make financial and legal decisions ": power_financial_yes
+
+  - "make financial and legal decisions ": power_financial_yes
     datatype: yesno
-  - "Make other decisions ": power_other_yes
+  - "make other decisions ": power_other_yes
     datatype: yesno
+  - label: "All of the above"
+    field: power_all_yes
+    datatype: yesno
+    check others: True
+---
+id: Triggering Events 1
+question: |
+  When should the caregiver powers start?
+fields:
+  - no label: when_powers_start
+    datatype: radio
+    choices:
+      - When this is signed: signed
+      - At a later time chosen on the next page: later
+---
+id: triggering event execution flags
+code: |
+  triggering_event_execution_yes = (when_powers_start == 'signed')
+  later = (when_powers_start == 'later')
 ---
 id: Triggering Events
 question: |2
-  Which event(s) do you want to trigger the appointed powers?
+  The caregiver powers should start if I
 fields:
-  - The signing of this document: triggering_event_execution_yes
+  - become mentally unable to care for my children: triggering_event_mental_incapacity_yes
     datatype: yesno
-  - I am mentally incapacitated and unable to care for my child(ren) or ward(s): triggering_event_mental_incapacity_yes
+  - become physically unable to care for my children: triggering_event_physical_debilitation_yes
     datatype: yesno
-  - I am physically debilitated and unable to care for my child(ren) or ward(s): triggering_event_physical_debilitation_yes
+  - "am in immigration detention, removed, or deported": triggering_event_immigration_yes
     datatype: yesno
-  - "I am detained in immigration detention, removed, or deported": triggering_event_immigration_yes
+  - "am arrested": triggering_event_incarceration_yes
     datatype: yesno
-  - "I am incarcerated based on criminal charges, including pending charges, or conviction": triggering_event_incarceration_yes
+  - sent to serve in the military: triggering_event_military_yes
     datatype: yesno
-  - I am deployed in military service: triggering_event_military_yes
+  - die and have made no other arrangements: triggering_event_death_yes
     datatype: yesno
-  - Upon my death: triggering_event_death_yes
+  - label: "All of the above"
+    field: triggering_event_all_yes
     datatype: yesno
+    check others: True
+subquestion: "If you select more than one, the one-year time period starts when the first happens "
 ---
 
 id: question_1791498080632
@@ -564,7 +593,7 @@ question: |2
   % if hasattr(witnesses, 'ask_number') and witnesses.ask_number and witnesses.target_number == 1:
   Name and address of witness
   % else:
-  ${ capitalize(ordinal(i)) } Witness
+  ${ capitalize(ordinal(i)) } witness
   % endif
 fields:
   - code: |
