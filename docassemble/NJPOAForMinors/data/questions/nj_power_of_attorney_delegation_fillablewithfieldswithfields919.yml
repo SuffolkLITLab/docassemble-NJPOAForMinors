@@ -1,10 +1,68 @@
 
-
+include:
+  - docassemble.AssemblyLine:assembly_line.yml
+  - docassemble.ALAnyState:any_state.yml
+  - docassemble.ALToolbox:collapse_template.yml
+---
 id: code_1791660512243
 code: |
   caregiver_name = [caregivers[0].name.full()]
   caregiver_address = [caregivers[0].address.on_one_line()]
   
+---
+id: cautionary message adult child
+question: Check the child's age
+subquestion: |2
+  The birthdate you entered says that this child
+  or ward is older than 18.
+  
+  This form is for appointing a caregiver for
+  a minor. Please review the child's information before
+  continuing.
+field: adult_child_action
+buttons:
+  - Edit this child's information: edit
+  - Restart (re-enter number of children): restart_children
+  - Exit interview: exit
+
+---
+id: user address
+sets:
+  - users[i].address.address
+  - users[i].address.city
+  - users[i].address.state
+  - users[i].address.zip
+  - users[i].address.unit
+  - users[i].address.country
+question: |
+  % if i == 0 and al_person_answering == "user":
+  What is your address?
+  % else:
+  What is ${ users[i] }'s address?
+  % endif
+fields:
+  - label: |
+      % if i > 0 and al_person_answering == "user":
+      Same as your address
+      % else:
+      Same as ${ users[0] }'s address
+      % endif
+    field: users[i].address
+    datatype: object_radio
+    choices:
+      - users[0].address if defined("users[0].address.address") else None
+    object labeler: |
+      lambda y: y.on_one_line()
+    none of the above: |
+      Somewhere else
+    disable others: True
+    show if:
+      code: |
+        i > 0 and defined("users[0].address.address")
+  - code: |
+      users[i].address_fields(
+          country_code=AL_DEFAULT_COUNTRY, default_state=AL_DEFAULT_STATE
+      )
 ---
 #id: code_1791587376371
 #code: |
@@ -16,7 +74,7 @@ id: code_1791508172797
 code: |
   users_names = users[0].name.full()
   users_addresses = users[0].address.on_one_line()
-  users_phone_numbers = users[0].phone_number
+  users_phone_numbers = users[0].phone
 
   if share_custody:
     users_names += " and " + other_parent[0].name.full()
@@ -25,16 +83,12 @@ code: |
 
   
 ---
-include:
-  - docassemble.AssemblyLine:assembly_line.yml
-  - docassemble.ALAnyState:any_state.yml
-  - docassemble.ALToolbox:collapse_template.yml
----
+
 metadata:
   title: >-
-    NJ Temporary Power of Attorney Appointment of a Minor 
+    NJ Power of Attorney and Delegation of Authority
   short title: >-
-    NJ Power of Attorney Dele
+    NJ Temporary Caregiver Appointment
   description: |-
     This form allows parents, custodians, or guardians to delegate authority to an alternative caregiver for the care of their minor child or ward. It ensures that the caregiver can make important decisions regarding the child's welfare.
   can_I_use_this_form: |
@@ -52,7 +106,7 @@ metadata:
   efiling_enabled: False
   integrated_efiling: False
   integrated_email_filing: False
-  requires_notarization: False
+  requires_notarization: True
   unlisted: False
   landing_page_url: >-
     https://courtformsonline.org/
@@ -138,10 +192,10 @@ code: |
 objects:
   - caregivers: "ALPeopleList.using(ask_number=True, target_number=1)"
   - caregivers2: "ALPeopleList.using(ask_number=True, target_number=1)"
-  - children: "ALPeopleList.using(ask_number=True, minimum_number=1)"
+  - children: "ALPeopleList.using(ask_number=True, minimum_number=1, complete_attribute='age_checked')"
   - other_parent: "ALPeopleList.using(ask_number=True, target_number=1)"
   - users: "ALPeopleList.using(ask_number=True, target_number=1)"
-  - witnesses: ALPeopleList.using(there_are_any=True)
+  - witnesses: "ALPeopleList.using(ask_number=True, target_number=2)"
 ---
 sections:
   - intro: Introduction
@@ -156,19 +210,17 @@ comment: |
 id: interview_order_nj_power_of_attorney_delegation_fillablewithfieldswithfields919
 mandatory: True
 code: |
-  nav.set_section('intro')
   al_intro_screen
   nj_power_of_attorney_delegation_fillablewithfieldswithfields919_intro
+  screen
+  if not screen:
+    not_eligible
   users.gather()
+  nav.set_section('intro')
   users_address = users[0].address.on_one_line()
-  correct_form1
-  if not correct_form1:
-    event = 'not_eligible'
-    force_ask('not_eligible')
-    exit
+  users[0].phone
   nav.set_section('parties')
-  children.target_number
-  children.gather()
+  children_confirmed
   share_custody
   if share_custody:
     other_parent.gather()
@@ -178,12 +230,17 @@ code: |
   else:
     alternate_consent_screen
   users_names
+  Caregiver_info_screen
+  caregivers.gather()
   caregiver_name
+  caregivers2.gather()
   caregiver2_name
   nav.set_section('case_details')
   set_progress(25)
   power_caregiving_yes
-  triggering_event_execution_yes
+  when_powers_start
+  if later:
+    triggering_event_mental_incapacity_yes
   nav.set_section('review_nj_power_of_attorney_delegation_fillablewithfieldswithfields919')
   set_progress(50)
   nj_power_of_attorney_delegation_fillablewithfieldswithfields919_preview_question
@@ -192,6 +249,7 @@ code: |
   signature_date
   sign_now
   if sign_now:
+    witnesses.gather()
     basic_questions_signature_flow
     users_signature_date
   store_variables_snapshot( persistent=True, data={ "zip": showifdef("users[0].address.zip"), "reached_interview_end": True, }, )
@@ -200,18 +258,40 @@ code: |
 ---
 id: NJ Power of Attorney Delegation Fillable with fields with fields9 19 intro
 continue button field: nj_power_of_attorney_delegation_fillablewithfieldswithfields919_intro
-question: "NJ Temporary Power of Attorney Appointment of a Minor (Fillable Form)"
+question: "NJ Temporary Caregiver Form"
 subquestion: |2
-  Fill out this form if you are a parent, custodian, or guardian in NJ wishing to temporarily give your parental powers over a minor child or ward to someone else.
+  Fill out this form if you are a parent, custodian, or guardian of a minor child or ward in NJ wishing to temporarily give parental powers to someone else.
   
   ### Before you get started
-  - Collect basic information about the parents and guardians, the children or wards, and the caregivers you wish to appoint.
+  * Collect names, addresses and phone numbers of the person you share custody with (if applicable), the caregiver you want to give parental powers to and an alternate caregiver.
+  * Collect names and birthdates of your children or wards.
+  
+  ### Important information to know
+  * You do not lose parental powers by giving a caregiver parental powers through this form.
+  * You can only give parental powers that you have.
+  * The caregiver you choose must be 18 years or older.
+  * The caregiver will have the powers up to a year from the date of an event you will choose in this form.
+  * The powers can be renewed yearly by repeating this process.
+  * You can take the powers back at any time by telling the caregiver.
   
   ### When you are finished
-  - Sign the form in the presence of a notary, 2 witnesses and the other person you share custody with (if applicable).
-  - Give a copy to the appointed caregiver and keep a copy for yourself.
-  
-
+  * Sign the form in the presence of a notary, two witnesses and the person you share custody with (if applicable).
+  * Give a copy to the chosen caregiver and keep a copy for yourself.
+---
+id: question_1792790939434
+question: "Are you a parent, guardian or custodian?"
+fields:
+  - no label: screen
+    datatype: yesnoradio
+---
+id: your contact information
+question: |
+  What is your phone number?
+fields:
+  - label: Phone number
+    field: "users[0].phone"
+    datatype: al_international_phone
+    required: False
 ---
 id: number of children or wards
 question: "How many children or wards are you appointing a caregiver for?"
@@ -222,14 +302,13 @@ fields:
     default: 1
 
 ---
-id: question_1790896093586
-question: "Do you want to fill this form out to appoint a caregiver for a minor child or ward?"
-subquestion: 
-  ${ collapse_template(minor_explanation) }
-fields:
-  - no label: correct_form1
-    datatype: yesnoradio
-    
+# id: question_1790896093586
+# question: "Do you want to fill this form out to appoint a caregiver for a child or ward under 18 years old?"
+# fields:
+#   - no label: correct_form1
+#     datatype: yesnoradio
+#   
+#     
 ---
 template: help_text_1791844930907
 subject: "More information"
@@ -237,14 +316,36 @@ content: "Add the help text here."
 ---
 
 id: not_eligible
-question: "This Interview Cannot Continue "
-subquestion: "This form assists with appointment of temporary parental powers over minors in NJ. Based on your answers, this form may not be correct for you."
 event: not_eligible
+question: |
+  This form may not be right for you
+subquestion: |
+  This form is for parents, guardians, and custodians of a minor child or ward in NJ who want to temporarily give parental powers to someone else.
 
+  Based on your answer, this form may not be the right fit for you.
+buttons:
+  - Exit: exit
+    url: https://courtformsonline.org/
+
+---
+id: Caregiver_info_screen
+continue button field: Caregiver_info_screen
+question: "Caregiver screens"
+subquestion: |2-
+  **Choosing a Caregiver**
+  In the next few screens you will be asked to choose the person you want to take care of your child or ward. This person must be 18 years or older.
+  
+  **Choosing an Alternate Caregiver**
+  You will also be asked to chose an alternate, in case your first choice becomes unwilling or unable.
+  
+  **Parental powers and timeline**
+  You will then have a choice as to which parental powers you want to give them and when they will get those powers. You can only give parental powers that you have yourself. Giving a caregiver parental powers does not take those parental powers away from you. 
+  
+  The powers last for one year from the date you sign this document or the date a chosen event happens. You can renew the powers for another year by completing this process again. You can take back the powers at any time by telling the caregiver. 
 ---
 id: Caregiver Info
 question: |2
-  Information about the Caregiver you wish to appoint
+  Caregiver you wish to appoint
 fields:
   - code: |
       caregivers[i].name_fields(show_suffix=False)
@@ -252,7 +353,9 @@ fields:
   - code: |
       caregivers[i].address_fields(show_country=False, show_county=False)
 
-  - Phone Number: caregivers[i].phone_number
+  - label: Phone number
+    field: caregivers[i].phone_number
+    datatype: al_international_phone
 sets:
   - "caregivers[i].name.first"
   - "caregivers[i].name.last"
@@ -266,8 +369,8 @@ sets:
 ---
 
 id: Alternate Attorney in Fact
-question: "Information about Alternate Caregiver"
-subquestion: "Name an alternate caregiver if ${caregivers[0].name.full()} is unable or unwilling."
+question: "Alternate Caregiver"
+subquestion: "Name an alternate caregiver if ${caregivers[0].name.familiar()} is unable or unwilling."
 fields:
   - code: |
       caregivers2[i].name_fields(show_suffix=False)
@@ -275,7 +378,8 @@ fields:
   - code: |
       caregivers2[i].address_fields(show_country=False, show_county=False)
 
-  - "Phone number:": caregivers2[i].phone_number 
+  - Phone number: "caregivers2[i].phone_number"
+    datatype: al_international_phone
 sets:
   - "caregivers2[i].name.first"
   - "caregivers2[i].name.last"
@@ -295,55 +399,78 @@ code: |
 ---
 id: Delegated Powers
 question: |2
-  Which powers do you wish to give to the Caregiver?
+  % if share_custody and other_parent_will_sign:
+    We allow the Caregiver to
+    % else:
+    I allow the Caregiver to
+    % endif
 fields:
-  - label: "Caregiving Power "
+  - label: "watch the child for a short time  "
     field: power_caregiving_yes
     datatype: yesno
-    help: Temporary care-giving power over the child(ren) or ward(s)
-  - label: Well-Being Power
+    help: "An example may be when you go on a vacation, this person will watch your children"
+  - label: "care for the child's basic needs"
     field: power_wellbeing_yes
     datatype: yesno
-    help: Power to give physical and mental well-being of the child(ren) or ward(s) (i.e. giving food and shelter)
-  - label: "Education Power "
+    help: food, shelter, mental and physical safety, etc.
+  - label: make education decisions
     field: power_education_yes
     datatype: yesno
-    help: "Power to enroll the child(ren) or ward(s) in suitable schools; to access school records; to authorize participation in school activities; and to make any and all decisions related to education, including special education"
-  - label: Healthcare Power
+    help: "enrollment, access to school records, sign permission slips, any and all decisions about school, including special education"
+  - label: "make medical, dental, and mental health decisions"
     field: power_healthcare_yes
     datatype: yesno
-    help: "The power to make medical, dental, and mental health decisions; to sign documents, waivers and releases required by a hospital or physician; to access medical, dental, or mental health records; to authorize admission to or discharge from any hospital or medical care facility; to meet with any health care provider; to consent to the provision, withholding, change or withdrawal of any health care procedure; and to make other decisions related to the health care needs of the child(ren) or ward(s)"
-  - label: "Travel Power "
+    help: "Including signing of documents, waivers and releases, access to medical records, admitting or discharge from any hospital or medical care facility, meetings with any health care provider, consenting, withholding, changing or withdrawal of procedures."
+  - label: "make travel and related decisions "
     field: power_travel_yes
     datatype: yesno
-    help: The power to make travel and all related arrangements for the child(ren) or ward(s) (i.e. hotel accommodations) both nationally and internationally; to join them on any such trips
-  - label: "Financial Power "
-    field: power_financial_yes
+    help: For example, hotel rooms. This applies to both national and international travel.
+
+  - "make financial and legal decisions ": power_financial_yes
     datatype: yesno
-    help: The power to handle financial decisions and personal and legal matters about the child(ren) or ward(s)
-  - label: "All Other Powers "
-    field: power_other_yes
+  - "make other decisions ": power_other_yes
     datatype: yesno
-    help: "The power to handle and engage in any and all other matters relating to the care, custody, and property of the child or ward which are allowed by applicable State law"
+  - label: "All of the above"
+    field: power_all_yes
+    datatype: yesno
+    check others: True
+---
+id: Triggering Events 1
+question: |
+  When should the caregiver powers start?
+fields:
+  - no label: when_powers_start
+    datatype: radio
+    choices:
+      - When this is signed: signed
+      - At a later time chosen on the next page: later
+---
+id: triggering event execution flags
+code: |
+  triggering_event_execution_yes = (when_powers_start == 'signed')
+  later = (when_powers_start == 'later')
 ---
 id: Triggering Events
 question: |2
-  What event(s) do you want to trigger the appointed powers?
+  The caregiver powers should start if I
 fields:
-  - The signing of this document: triggering_event_execution_yes
+  - become mentally unable to care for my children: triggering_event_mental_incapacity_yes
     datatype: yesno
-  - I am mentally incapacitated and unable to care for my child(ren) or ward(s): triggering_event_mental_incapacity_yes
+  - become physically unable to care for my children: triggering_event_physical_debilitation_yes
     datatype: yesno
-  - I am physically debilitated and unable to care for my child(ren) or ward(s): triggering_event_physical_debilitation_yes
+  - "am in immigration detention, removed, or deported": triggering_event_immigration_yes
     datatype: yesno
-  - "I am detained in immigration detention, removed, or deported": triggering_event_immigration_yes
+  - "am arrested": triggering_event_incarceration_yes
     datatype: yesno
-  - "I am incarcerated based on criminal charges, including pending charges, or conviction": triggering_event_incarceration_yes
+  - am sent to serve in the military: triggering_event_military_yes
     datatype: yesno
-  - I am deployed in military service: triggering_event_military_yes
+  - die and have made no other arrangements: triggering_event_death_yes
     datatype: yesno
-  - Upon my death: triggering_event_death_yes
+  - label: "All of the above"
+    field: triggering_event_all_yes
     datatype: yesno
+    check others: True
+subquestion: "If you select more than one, the one-year period begins when the first event occurs."
 ---
 
 id: question_1791498080632
@@ -354,38 +481,46 @@ fields:
     
 ---
 id: question_1790192051493
-question: "Will ${ other_parent[0].name.full() } sign?"
+question: |
+  Will ${ other_parent[0].name.familiar() } sign?
+subquestion: |
+  ${ collapse_template(sign_information) }
 fields:
   - no label: other_parent_will_sign
     datatype: yesnoradio
 ---
+template: sign_information
+subject: Help me decide
+content: |
+  When you share custody with someone, generally they must also sign this form. If you select no, you will be asked to select or write a reason or reasons why they will not sign. Some reasons include that the person is unreachable, cannot be located, unable to consent because of a disability, etc.
+---
 id: Consent of Other Parent
 continue button field: other_parent_consent_screen
 question: |2
-  Reason(s) why ${ other_parent[0].name.full() }  will not sign the form:
+   ${ other_parent[0].name.familiar() } will not sign the form because they 
 fields:
-  - "${ other_parent[0].name.full() }  is deceased": other_parent_deceased_yes
+  - are deceased: other_parent_deceased_yes
     datatype: yesno
-  - "${ other_parent[0].name.full() } does not have custody": other_parent_no_custody_yes
+  - do not have custody: other_parent_no_custody_yes
     datatype: yesno
-  - "${ other_parent[0].name.full() } is unable to consent": other_parent_unable_consent_yes
+  - are mentally or physically unable to consent: other_parent_unable_consent_yes
     datatype: yesno
-  - label: "${ other_parent[0].name.full() } is not involved"
+  - label: have not raised or financially supported the child
     field: other_parent_not_involved_yes
     datatype: yesno
     help: for at least the last 2 years or 1/3 of the child’s life (whichever is less)
-  - Other parent is unknown: other_parent_unknown_yes
+  - cannot be located: other_parent_unknown_yes
     datatype: yesno
-  - "${ other_parent[0].name.full() } is unreachable": other_parent_unreachable_yes
+  - are unreachable: other_parent_unreachable_yes
     datatype: yesno
-  - label: "Efforts made to reach  ${ other_parent[0].name.full() }  "
+  - label: "Efforts made to reach  ${ other_parent[0].name.familiar() }  "
     field: users_diligent_efforts
     required: False
     show if: other_parent_unreachable_yes
     input type: area
-  - Other: other_parent_other_yes
+  - other: other_parent_other_yes
     datatype: yesno
-  - label: Other explanation
+  - label: other explanation
     field: other_parent_other_text
     input type: area
     required: False
@@ -394,14 +529,21 @@ fields:
 id: alternate_consent
 continue button field: alternate_consent_screen
 question: |2
-  Reason(s) why you have sole custody:
+  I have sole custody, because the other parent
 fields:
-  - Other parent does not have custody: other_parent_no_custody_yes
+  - is unknown: other_parent_unknown_yes
     datatype: yesno
-  - Other parent is unknown: other_parent_unknown_yes
+  - does not have custody: other_parent_no_custody_yes
     datatype: yesno
-  - Other parent is deceased: other_parent_deceased_yes
+  - is deceased: other_parent_deceased_yes
     datatype: yesno
+  - Other: other_parent_other_yes
+    datatype: yesno
+  - label: Other explanation
+    field: other_parent_other_text
+    input type: area
+    required: False
+    show if: other_parent_other_yes
 ---
 comment: |
   The questions below are copies of the questions in AssemblyLine's
@@ -413,7 +555,7 @@ comment: |
 id: other parent names
 question: |2
   % if hasattr(other_parent, 'ask_number') and other_parent.ask_number and other_parent.target_number == 1:
-  Information about other parent, custodian or guardian
+  Person you share custody with
   % else:
   Name of the ${ ordinal(i) } other parent
   % endif
@@ -421,7 +563,9 @@ fields:
   - code: |
       other_parent[i].name_fields(show_suffix=False) + other_parent[i].address_fields(default_state=AL_DEFAULT_STATE, show_country=False, show_county=False)
 
-  - Phone number: other_parent[i].phone_number
+  - label: Phone number
+    field: other_parent[i].phone_number
+    datatype: al_international_phone
 
 sets:
   - "other_parent[i].name.first"
@@ -435,15 +579,9 @@ sets:
   - "users[i].name.last"
   - "users[i].name.middle"
   - "users[i].name.suffix"
-  - users_address.address.address
-  - users_address.address.city
-  - users_address.address.zip
-  - users_address.address.unit
-  - users_address.address.state
-  - users_address.address.country
 question: |
   % if i == 0 and al_person_answering == "user":
-  Tell us about yourself
+  What is your full legal name?
   % elif al_form_type in ['starts_case', 'existing_case', 'appeal']:
   Who is the ${ ordinal(i) } person on your side of the case?
   % else:
@@ -452,26 +590,25 @@ question: |
   % endif
 fields:
   - code: |
-      users[i].name_fields(show_suffix=False) + users[i].address_fields(default_state=AL_DEFAULT_STATE, show_country=False, show_county=False)
-  - Phone Number: users[i].phone_number
+      users[i].name_fields(show_suffix=False) 
 ---
 id: witnesses names
 sets:
+  - "witnesses[i].name.suffix"
   - "witnesses[i].name.first"
   - "witnesses[i].name.last"
   - "witnesses[i].name.middle"
-  - "witnesses[i].name.suffix"
   - "witnesses[i].address.address"
   - "witnesses[i].address.city"
   - "witnesses[i].address.zip"
   - "witnesses[i].address.unit"
   - "witnesses[i].address.state"
   - "witnesses[i].address.country"
-question: |
+question: |2
   % if hasattr(witnesses, 'ask_number') and witnesses.ask_number and witnesses.target_number == 1:
   Name and address of witness
   % else:
-  Name and address of the ${ ordinal(i) } witness
+  ${ capitalize(ordinal(i)) } witness
   % endif
 fields:
   - code: |
@@ -479,18 +616,11 @@ fields:
   - code: |
       witnesses[i].address_fields(show_country=False, show_county=False)
 ---
-id: another witness
-question: |
-  Is there another witness to tell us about?
-fields:
-  - no label: witnesses.there_is_another
-    datatype: yesnoradio
----
 id: question_1790357534515
-question: |2
-  Are you with a notary, 2 witnesses \
+question: |
+  Are you with a notary, two witnesses
   % if share_custody and other_parent_will_sign:
-  and ${ other_parent[0].name_full() } \
+  and ${ other_parent[0].name_full() }
   % endif
   and want to sign this document electronically?
 fields:
@@ -512,22 +642,61 @@ code: |
 ---
 id: children names 1
 sets:
-  - children[i].name.first
-  - children[i].name.last
-  - children[i].name.middle
-  - children[i].name.suffix
+  - "children[i].name.suffix"
+  - "children[i].name.first"
+  - "children[i].name.last"
+  - "children[i].name.middle"
 question: |2
   % if hasattr(children, 'ask_number') and children.ask_number and children.target_number == 1:
-  Information about the child or ward
+  Child or Ward
   % else:
-  Information about the ${ ordinal(i) } child or ward
+  ${ capitalize(ordinal(i)) } Child or Ward
   % endif
 fields:
-  - code: |      
+  - code: |
       children[i].name_fields(show_suffix=False)
   - Birthdate: "children[i].birthdate"
     datatype: BirthDate
+---
+id: check child age
+sets:
+  - children[i].age_checked
+code: |
+  children[i].name.first
+  children[i].birthdate
+  while children[i].birthdate <= today().minus(years=18):
+    adult_child_action
+    if adult_child_action == 'exit':
+      command('exit')
+    elif adult_child_action == 'restart_children':
+      undefine('adult_child_action')
+      # setattr avoids docassemble thinking this block defines target_number
+      setattr(children, 'target_number', i + 1)
+      setattr(children, 'restart_requested', True)
+      break
+    else:  # 'edit': re-ask this child's name and birthdate
+      undefine('adult_child_action')
+      undefine('children[i].name.first')
+      undefine('children[i].birthdate')
+      children[i].name.first
+      children[i].birthdate
+  children[i].age_checked = True
 
+---
+id: gather children
+code: |
+  while True:
+    children.target_number
+    children.gather()
+    if getattr(children, 'restart_requested', False):
+      # Clear the flag first, then wipe the list so the count question is asked again
+      children.restart_requested = False
+      children.clear()
+      children.reset_gathered()
+      undefine('children.target_number')
+      continue
+    break
+  children_confirmed = True
 ---
 # id: code_1791144921638
 # code: |
@@ -579,41 +748,53 @@ event: review_nj_power_of_attorney_delegation_fillablewithfieldswithfields919
 question: |
   Review your answers
 review:
-  - Edit: users_names
+  - Edit: users.revisit
     button: |
-      **Parties Information**
+      **Your Information**
 
-      Names of parent or guardian: ${ showifdef('users_names') }
-
-      Addresses of parent or guardian: ${ single_paragraph(users_addresses) if defined('users_addresses') else '' }
-
-      Phone numbers of parent or guardian: ${ showifdef('users_phone_numbers') }
-
-      Address of alternative caregiver: ${ single_paragraph(caregiver_address) if defined('caregiver_address') else '' }
-  - Edit: other_parent_deceased_yes
+      % for item in users:
+        * ${ item }
+      % endfor
+  - Edit: other_parent.revisit
     button: |
-      **Consent of Other Parent**
+      **Person you share custody with**
 
-      Other parent is deceased: ${ word(yesno(other_parent_deceased_yes)) if defined('other_parent_deceased_yes') else '' }
+      % for item in other_parent:
+        * ${ item }
+      % endfor
+  - Edit: children.revisit
+    button: |
+      **Children**
 
-      Other parent has no custody: ${ word(yesno(other_parent_no_custody_yes)) if defined('other_parent_no_custody_yes') else '' }
+      % for item in children:
+        * ${ item }
+      % endfor
+  - Edit: caregivers.revisit
+    button: |
+      **Appointed Caregiver**
 
-      Other parent unable to consent: ${ word(yesno(other_parent_unable_consent_yes)) if defined('other_parent_unable_consent_yes') else '' }
+      % for item in caregivers:
+        * ${ item }
+      % endfor
+  - Edit: caregivers2.revisit
+    button: |
+      **Alternate Caregiver**
 
-      Other parent not involved: ${ word(yesno(other_parent_not_involved_yes)) if defined('other_parent_not_involved_yes') else '' }
+      % for item in caregivers2:
+        * ${ item }
+      % endfor
 
-      Other parent is unknown: ${ word(yesno(other_parent_unknown_yes)) if defined('other_parent_unknown_yes') else '' }
+  - Edit: witnesses.revisit
+    button: |
+      **Witnesses**
 
-      Other parent unreachable: ${ word(yesno(other_parent_unreachable_yes)) if defined('other_parent_unreachable_yes') else '' }
+      % for item in witnesses:
+        * ${ item }
+      % endfor
 
-      Description of diligent efforts: ${ single_paragraph(users_diligent_efforts) if defined('users_diligent_efforts') else '' }
-
-      Other parent reason specified: ${ word(yesno(other_parent_other_yes)) if defined('other_parent_other_yes') else '' }
-
-      Other parent reason explanation: ${ single_paragraph(other_parent_other_text) if defined('other_parent_other_text') else '' }
   - Edit: power_caregiving_yes
     button: |
-      **Delegated Powers**
+      **Assigned Parental Powers**
 
       Caregiving power granted: ${ word(yesno(power_caregiving_yes)) if defined('power_caregiving_yes') else '' }
 
@@ -645,231 +826,36 @@ review:
       Military deployment triggers authority: ${ word(yesno(triggering_event_military_yes)) if defined('triggering_event_military_yes') else '' }
 
       Death triggers authority: ${ word(yesno(triggering_event_death_yes)) if defined('triggering_event_death_yes') else '' }
-  - Edit: caregiver2_address
+
+  - Edit: users[0].signature
     button: |
-      **Alternate Attorney-in-Fact**
+      **Your signature**
 
-      Address of alternate caregiver 2: ${ single_paragraph(caregiver2_address) if defined('caregiver2_address') else '' }
-  - Edit: users_signature_date
+      Redo your signature
+  - Edit: other_parent[0].signature
     button: |
-      **Signatures**
+      **${ other_parent[0].name.full() }'s signature**
 
-      Date of user's signature: ${ showifdef('users_signature_date') }
-
-      Date of other parent's signature: ${ showifdef('other_parent_signature_date') }
-
-      Address of first witness: ${ single_paragraph(witnesses1_address) if defined('witnesses1_address') else '' }
-
-      Date of first witness signature: ${ showifdef('witnesses1_signature_date') }
-
-      Address of second witness: ${ single_paragraph(witnesses2_address) if defined('witnesses2_address') else '' }
-
-      Date of second witness signature: ${ showifdef('witnesses2_signature_date') }
-  - Edit: caregivers.revisit
+      Redo their signature
+  - Edit: witnesses[0].signature
     button: |
-      **Caregivers**
+      **First witness signature**
 
-      % for item in caregivers:
-        * ${ item }
-      % endfor
-  - Edit: children.revisit
+      Redo the first witness's signature
+  - Edit: witnesses[1].signature
     button: |
-      **Children**
+      **Second witness signature**
 
-      % for item in children:
-        * ${ item }
-      % endfor
-  - Edit: other_parent.revisit
-    button: |
-      **Other parent**
-
-      % for item in other_parent:
-        * ${ item }
-      % endfor
-  - Edit: witnesses.revisit
-    button: |
-      **Witnesses**
-
-      % for item in witnesses:
-        * ${ item }
-      % endfor
-  - Edit: users_names
-    button: |
-      **Names of parent or guardian**
-
-      Names of parent or guardian: ${ showifdef('users_names') }
-  - Edit: users_addresses
-    button: |
-      **Addresses of parent or guardian**
-
-      Addresses of parent or guardian: ${ single_paragraph(users_addresses) if defined('users_addresses') else '' }
-  - Edit: users_phone_numbers
-    button: |
-      **Phone numbers of parent or guardian**
-
-      Phone numbers of parent or guardian: ${ showifdef('users_phone_numbers') }
-  - Edit: caregiver_address
-    button: |
-      **Address of alternative caregiver**
-
-      Address of alternative caregiver: ${ single_paragraph(caregiver_address) if defined('caregiver_address') else '' }
-  - Edit: other_parent_deceased_yes
-    button: |
-      **Other parent is deceased**
-
-      Other parent is deceased: ${ word(yesno(other_parent_deceased_yes)) if defined('other_parent_deceased_yes') else '' }
-  - Edit: other_parent_no_custody_yes
-    button: |
-      **Other parent has no custody**
-
-      Other parent has no custody: ${ word(yesno(other_parent_no_custody_yes)) if defined('other_parent_no_custody_yes') else '' }
-  - Edit: other_parent_unable_consent_yes
-    button: |
-      **Other parent unable to consent**
-
-      Other parent unable to consent: ${ word(yesno(other_parent_unable_consent_yes)) if defined('other_parent_unable_consent_yes') else '' }
-  - Edit: other_parent_not_involved_yes
-    button: |
-      **Other parent not involved**
-
-      Other parent not involved: ${ word(yesno(other_parent_not_involved_yes)) if defined('other_parent_not_involved_yes') else '' }
-  - Edit: other_parent_unknown_yes
-    button: |
-      **Other parent is unknown**
-
-      Other parent is unknown: ${ word(yesno(other_parent_unknown_yes)) if defined('other_parent_unknown_yes') else '' }
-  - Edit: other_parent_unreachable_yes
-    button: |
-      **Other parent unreachable**
-
-      Other parent unreachable: ${ word(yesno(other_parent_unreachable_yes)) if defined('other_parent_unreachable_yes') else '' }
-  - Edit: users_diligent_efforts
-    button: |
-      **Description of diligent efforts**
-
-      Description of diligent efforts: ${ single_paragraph(users_diligent_efforts) if defined('users_diligent_efforts') else '' }
-  - Edit: other_parent_other_yes
-    button: |
-      **Other parent reason specified**
-
-      Other parent reason specified: ${ word(yesno(other_parent_other_yes)) if defined('other_parent_other_yes') else '' }
-  - Edit: other_parent_other_text
-    button: |
-      **Other parent reason explanation**
-
-      Other parent reason explanation: ${ single_paragraph(other_parent_other_text) if defined('other_parent_other_text') else '' }
-  - Edit: power_caregiving_yes
-    button: |
-      **Caregiving power granted**
-
-      Caregiving power granted: ${ word(yesno(power_caregiving_yes)) if defined('power_caregiving_yes') else '' }
-  - Edit: power_wellbeing_yes
-    button: |
-      **Well-being power granted**
-
-      Well-being power granted: ${ word(yesno(power_wellbeing_yes)) if defined('power_wellbeing_yes') else '' }
-  - Edit: power_education_yes
-    button: |
-      **Education power granted**
-
-      Education power granted: ${ word(yesno(power_education_yes)) if defined('power_education_yes') else '' }
-  - Edit: power_healthcare_yes
-    button: |
-      **Healthcare power granted**
-
-      Healthcare power granted: ${ word(yesno(power_healthcare_yes)) if defined('power_healthcare_yes') else '' }
-  - Edit: power_travel_yes
-    button: |
-      **Travel power granted**
-
-      Travel power granted: ${ word(yesno(power_travel_yes)) if defined('power_travel_yes') else '' }
-  - Edit: power_financial_yes
-    button: |
-      **Financial power granted**
-
-      Financial power granted: ${ word(yesno(power_financial_yes)) if defined('power_financial_yes') else '' }
-  - Edit: power_other_yes
-    button: |
-      **Other powers granted**
-
-      Other powers granted: ${ word(yesno(power_other_yes)) if defined('power_other_yes') else '' }
-  - Edit: triggering_event_execution_yes
-    button: |
-      **Event execution triggers authority**
-
-      Event execution triggers authority: ${ word(yesno(triggering_event_execution_yes)) if defined('triggering_event_execution_yes') else '' }
-  - Edit: triggering_event_mental_incapacity_yes
-    button: |
-      **Mental incapacity triggers authority**
-
-      Mental incapacity triggers authority: ${ word(yesno(triggering_event_mental_incapacity_yes)) if defined('triggering_event_mental_incapacity_yes') else '' }
-  - Edit: triggering_event_physical_debilitation_yes
-    button: |
-      **Physical debilitation triggers authority**
-
-      Physical debilitation triggers authority: ${ word(yesno(triggering_event_physical_debilitation_yes)) if defined('triggering_event_physical_debilitation_yes') else '' }
-  - Edit: triggering_event_immigration_yes
-    button: |
-      **Immigration triggers authority**
-
-      Immigration triggers authority: ${ word(yesno(triggering_event_immigration_yes)) if defined('triggering_event_immigration_yes') else '' }
-  - Edit: triggering_event_incarceration_yes
-    button: |
-      **Incarceration triggers authority**
-
-      Incarceration triggers authority: ${ word(yesno(triggering_event_incarceration_yes)) if defined('triggering_event_incarceration_yes') else '' }
-  - Edit: triggering_event_military_yes
-    button: |
-      **Military deployment triggers authority**
-
-      Military deployment triggers authority: ${ word(yesno(triggering_event_military_yes)) if defined('triggering_event_military_yes') else '' }
-  - Edit: triggering_event_death_yes
-    button: |
-      **Death triggers authority**
-
-      Death triggers authority: ${ word(yesno(triggering_event_death_yes)) if defined('triggering_event_death_yes') else '' }
-  - Edit: caregiver2_address
-    button: |
-      **Address of alternate caregiver 2**
-
-      Address of alternate caregiver 2: ${ single_paragraph(caregiver2_address) if defined('caregiver2_address') else '' }
-  - Edit: users_signature_date
-    button: |
-      **Date of user's signature**
-
-      Date of user's signature: ${ showifdef('users_signature_date') }
-  - Edit: other_parent_signature_date
-    button: |
-      **Date of other parent's signature**
-
-      Date of other parent's signature: ${ showifdef('other_parent_signature_date') }
-  - Edit: witnesses1_address
-    button: |
-      **Address of first witness**
-
-      Address of first witness: ${ single_paragraph(witnesses1_address) if defined('witnesses1_address') else '' }
-  - Edit: witnesses1_signature_date
-    button: |
-      **Date of first witness signature**
-
-      Date of first witness signature: ${ showifdef('witnesses1_signature_date') }
-  - Edit: witnesses2_address
-    button: |
-      **Address of second witness**
-
-      Address of second witness: ${ single_paragraph(witnesses2_address) if defined('witnesses2_address') else '' }
-  - Edit: witnesses2_signature_date
-    button: |
-      **Date of second witness signature**
-
-      Date of second witness signature: ${ showifdef('witnesses2_signature_date') }
-  - Edit: users.revisit
-    button: |
-      **Users**
-
-      % for item in users:
-        * ${ item }
-      % endfor
+      Redo the second witness's signature
+---
+# reconsider: True
+# code: |
+#   show_other_parent_consent_review = bool(
+#     share_custody
+#     and defined('other_parent_will_sign')
+#     and not other_parent_will_sign
+#   )
+#   show_sole_custody_review = bool(not share_custody)
 ---
 id: edit caregivers
 continue button field: caregivers.revisit
@@ -885,10 +871,13 @@ rows: caregivers
 columns:
   - Name: |
       row_item.name_full() if defined("row_item.name.first") else ""
+  - Address: |
+      row_item.address.on_one_line() if defined("row_item.address.address") else ""
   - Phone number: |
       row_item.phone_number if defined("row_item.phone_number") else ""
 edit:
   - name.first
+  - address.address
   - phone_number
 confirm: True
 ---
@@ -925,9 +914,16 @@ subquestion: |
 table: other_parent.table
 rows: other_parent
 columns:
-  - Signature: |
-      row_item.signature if defined("row_item.signature") else ""
-edit: True
+  - Name: |
+      row_item.name_full() if defined("row_item.name.first") else ""
+  - Address: |
+      row_item.address.on_one_line() if defined("row_item.address.address") else ""
+  - Phone number: |
+      row_item.phone_number if defined("row_item.phone_number") else ""
+edit:
+  - name.first
+  - address.address
+  - phone_number
 confirm: True
 ---
 id: edit witnesses
@@ -942,9 +938,14 @@ subquestion: |
 table: witnesses.table
 rows: witnesses
 columns:
-  - Signature: |
-      row_item.signature if defined("row_item.signature") else ""
-edit: True
+  - Name: |
+      row_item.name_full() if defined("row_item.name.first") else ""
+  - Address: |
+      row_item.address.on_one_line() if defined("row_item.address.address") else ""
+
+edit:
+  - name.first
+  - address.address
 confirm: True
 ---
 id: edit users
@@ -959,27 +960,36 @@ subquestion: |
 table: users.table
 rows: users
 columns:
-  - Signature: |
-      row_item.signature if defined("row_item.signature") else ""
-edit: True
+  - Name: |
+      row_item.name_full() if defined("row_item.name.first") else ""
+  - Address: |
+      row_item.address.on_one_line() if defined("row_item.address.address") else ""
+  - Phone number: |
+      row_item.phone_number if defined("row_item.phone_number") else ""
+edit:
+  - name.first
+  - address.address
+  - phone_number
 confirm: True
 ---
 id: download nj_power_of_attorney_delegation_fillablewithfieldswithfields919
 event: nj_power_of_attorney_delegation_fillablewithfieldswithfields919_download
-question: |
-  All done
-subquestion: |
-  Thank you ${users}. Your form is ready to download and deliver.
-
+question: |2
+  Form Complete!
+subquestion: |2
+  Thank you ${users}. Your form is ready to download and print.  
+  % if not sign_now:
+  **Important:** You chose not to sign electronically. You must print this form and sign it in front of a notary, plus 2 witnesses${ (", and " + other_parent[0].name_full()) if (share_custody and other_parent_will_sign) else "" } before you are finished.
+  % endif
+  
   Use the options on this page to view, download and send your form. Use the
   "Edit answers" button to fix any mistakes.
-
+  
   ${ action_button_html(url_action('review_nj_power_of_attorney_delegation_fillablewithfieldswithfields919'), label=word('Edit answers'), color='info') }
-
+  
   ${ al_user_bundle.download_list_html() }
-
+  
   ${ al_user_bundle.send_button_html(show_editable_checkbox=False) }
-
 progress: 100
 ---
 # ALDocument objects specify the metadata for each template
@@ -993,7 +1003,7 @@ objects:
 ---
 code: |
   nj_power_of_attorney_delegation_fillablewithfieldswithfields919_attachment.overflow_fields.initializeObject('children', ALAddendumField, field_name='children')
-  nj_power_of_attorney_delegation_fillablewithfieldswithfields919_attachment.overflow_fields['children'].overflow_trigger = 4
+  nj_power_of_attorney_delegation_fillablewithfieldswithfields919_attachment.overflow_fields['children'].overflow_trigger = 3 if len(children) > 4 else 4
   nj_power_of_attorney_delegation_fillablewithfieldswithfields919_attachment.overflow_fields['children'].label = "Additional Children"
   nj_power_of_attorney_delegation_fillablewithfieldswithfields919_attachment.overflow_fields['children'].headers = [
     {"name": "Name"},
@@ -1005,10 +1015,10 @@ template: nj_power_of_attorney_delegation_fillablewithfieldswithfields919_attach
 content: |
   NJ Power of Attorney Delegation Fillable-with-fields-with-fields9-19
 ---
-template: minor_explanation
-subject: definition of a minor
-content: |
-  A minor child or ward is under 18 years old
+# template: minor_explanation
+# subject: definition of a minor
+# content: |
+#   A minor child or ward is under 18 years old
 ---
 template: help_text_1791844981373
 subject: "More information"
@@ -1047,12 +1057,12 @@ attachment:
       - "other_parent_other_text": ${ other_parent_other_text }
       - "children1_name": ${ children[0].name.full() }
       - "children1_birthdate": ${ children[0].birthdate }
-      - "children2_name": ${ children[1].name.full() }
-      - "children2_birthdate": ${ children[1].birthdate }
-      - "children3_name": ${ children[2].name.full() }
-      - "children3_birthdate": ${ children[2].birthdate }
-      - "children4_name": ${ children[3].name.full() }
-      - "children4_birthdate": ${ children[3].birthdate }
+      - "children2_name": ${ children[1].name.full() if len(children) > 1 else "" }
+      - "children2_birthdate": ${ children[1].birthdate if len(children) > 1 else "" }
+      - "children3_name": ${ children[2].name.full() if len(children) > 2 else "" }
+      - "children3_birthdate": ${ children[2].birthdate if len(children) > 2 else "" }
+      - "children4_name": ${ "See addendum" if len(children) > 4 else (children[3].name.full() if len(children) > 3 else "") }
+      - "children4_birthdate": ${ "" if len(children) > 4 else (children[3].birthdate if len(children) > 3 else "") }
       - "power_caregiving_yes": ${ power_caregiving_yes }
       - "power_wellbeing_yes": ${ power_wellbeing_yes }
       - "power_education_yes": ${ power_education_yes }
@@ -1101,8 +1111,8 @@ attachment:
   tagged pdf: True
 ---
 id: Al next steps
-question: |
-  Al next steps
+question: |2
+  Next Steps
 fields:
 - Al next steps intro prompt: al_next_steps_intro_prompt
 ---
