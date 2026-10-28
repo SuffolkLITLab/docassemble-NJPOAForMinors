@@ -13,10 +13,10 @@ code: |
 id: cautionary message adult child
 question: Check the child's age
 subquestion: |2
-  The birthdate you entered indicates that this child
+  The birthdate you entered says that this child
   or ward is older than 18.
   
-  This form is intended for appointing a caregiver for
+  This form is for appointing a caregiver for
   a minor. Please review the child's information before
   continuing.
 field: adult_child_action
@@ -86,9 +86,9 @@ code: |
 
 metadata:
   title: >-
-    NJ Temporary Power of Attorney Appointment of a Minor 
+    NJ Power of Attorney and Delegation of Authority
   short title: >-
-    NJ Power of Attorney Dele
+    NJ Temporary Caregiver Appointment
   description: |-
     This form allows parents, custodians, or guardians to delegate authority to an alternative caregiver for the care of their minor child or ward. It ensures that the caregiver can make important decisions regarding the child's welfare.
   can_I_use_this_form: |
@@ -213,6 +213,8 @@ code: |
   al_intro_screen
   nj_power_of_attorney_delegation_fillablewithfieldswithfields919_intro
   screen
+  if not screen:
+    not_eligible
   users.gather()
   nav.set_section('intro')
   users_address = users[0].address.on_one_line()
@@ -256,18 +258,25 @@ code: |
 ---
 id: NJ Power of Attorney Delegation Fillable with fields with fields9 19 intro
 continue button field: nj_power_of_attorney_delegation_fillablewithfieldswithfields919_intro
-question: "NJ Temporary Power of Attorney Appointment"
+question: "NJ Temporary Caregiver Form"
 subquestion: |2
-  Fill out this form if you are a parent, custodian, or guardian in NJ wishing to temporarily give your parental powers over a minor child or ward to someone else.
+  Fill out this form if you are a parent, custodian, or guardian of a minor child or ward in NJ wishing to temporarily give parental powers to someone else.
   
   ### Before you get started
-  - Collect basic information about the parents and guardians, the children or wards, and the caregivers you wish to appoint.
+  * Collect names, addresses and phone numbers of the person you share custody with (if applicable), the caregiver you want to give parental powers to and an alternate caregiver.
+  * Collect names and birthdates of your children or wards.
+  
+  ### Important information to know
+  * You do not lose parental powers by giving a caregiver parental powers through this form.
+  * You can only give parental powers that you have.
+  * The caregiver you choose must be 18 years or older.
+  * The caregiver will have the powers up to a year from the date of an event you will choose in this form.
+  * The powers can be renewed yearly by repeating this process.
+  * You can take the powers back at any time by telling the caregiver.
   
   ### When you are finished
-  - Sign the form in the presence of a notary, 2 witnesses and the other person you share custody with (if applicable).
-  - Give a copy to the appointed caregiver and keep a copy for yourself.
-  
-
+  * Sign the form in the presence of a notary, two witnesses and the person you share custody with (if applicable).
+  * Give a copy to the chosen caregiver and keep a copy for yourself.
 ---
 id: question_1792790939434
 question: "Are you a parent, guardian or custodian?"
@@ -307,9 +316,16 @@ content: "Add the help text here."
 ---
 
 id: not_eligible
-question: "This Interview Cannot Continue "
-subquestion: "This form assists with appointment of temporary parental powers for minors in NJ. Based on your answers, this form may not be correct for you."
 event: not_eligible
+question: |
+  This form may not be right for you
+subquestion: |
+  This form is for parents, guardians, and custodians of a minor child or ward in NJ who want to temporarily give parental powers to someone else.
+
+  Based on your answer, this form may not be the right fit for you.
+buttons:
+  - Exit: exit
+    url: https://courtformsonline.org/
 
 ---
 id: Caregiver_info_screen
@@ -323,9 +339,9 @@ subquestion: |2-
   You will also be asked to chose an alternate, in case your first choice becomes unwilling or unable.
   
   **Parental powers and timeline**
-  You will then have a choice as to which parental powers you want to give them and when they will get those powers.
+  You will then have a choice as to which parental powers you want to give them and when they will get those powers. You can only give parental powers that you have yourself. Giving a caregiver parental powers does not take those parental powers away from you. 
   
-  The powers will last for one year from when you choose to give those powers. The powers can be renewed in yearly increments by following this process again. You can take back these powers at any point by telling the chosen caregiver.
+  The powers last for one year from the date you sign this document or the date a chosen event happens. You can renew the powers for another year by completing this process again. You can take back the powers at any time by telling the caregiver. 
 ---
 id: Caregiver Info
 question: |2
@@ -354,7 +370,7 @@ sets:
 
 id: Alternate Attorney in Fact
 question: "Alternate Caregiver"
-subquestion: "Name an alternate caregiver if ${caregivers[0].name.full()} is unable or unwilling."
+subquestion: "Name an alternate caregiver if ${caregivers[0].name.familiar()} is unable or unwilling."
 fields:
   - code: |
       caregivers2[i].name_fields(show_suffix=False)
@@ -362,8 +378,7 @@ fields:
   - code: |
       caregivers2[i].address_fields(show_country=False, show_county=False)
 
-  - label: Phone number
-    field: caregivers2[i].phone_number
+  - Phone number: "caregivers2[i].phone_number"
     datatype: al_international_phone
 sets:
   - "caregivers2[i].name.first"
@@ -447,7 +462,7 @@ fields:
     datatype: yesno
   - "am arrested": triggering_event_incarceration_yes
     datatype: yesno
-  - sent to serve in the military: triggering_event_military_yes
+  - am sent to serve in the military: triggering_event_military_yes
     datatype: yesno
   - die and have made no other arrangements: triggering_event_death_yes
     datatype: yesno
@@ -455,7 +470,7 @@ fields:
     field: triggering_event_all_yes
     datatype: yesno
     check others: True
-subquestion: "If you select more than one, the one-year time period starts when the first happens "
+subquestion: "If you select more than one, the one-year period begins when the first event occurs."
 ---
 
 id: question_1791498080632
@@ -601,18 +616,11 @@ fields:
   - code: |
       witnesses[i].address_fields(show_country=False, show_county=False)
 ---
-id: another witness
-question: |
-  Is there another witness to tell us about?
-fields:
-  - no label: witnesses.there_is_another
-    datatype: yesnoradio
----
 id: question_1790357534515
-question: |2
-  Are you with a notary, 2 witnesses \
+question: |
+  Are you with a notary, two witnesses
   % if share_custody and other_parent_will_sign:
-  and ${ other_parent[0].name_full() } \
+  and ${ other_parent[0].name_full() }
   % endif
   and want to sign this document electronically?
 fields:
