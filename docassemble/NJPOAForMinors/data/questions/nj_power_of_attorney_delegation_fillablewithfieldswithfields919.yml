@@ -21,7 +21,10 @@ subquestion: |2
   continuing.
 field: adult_child_action
 buttons:
-  [{"Change the number of children":"restart_children"},{"Exit interview":"exit"}]
+  - Change the number of children: restart_children
+    color: warning
+  - Exit interview: exit
+    color: danger
 ---
 id: user address
 sets:
@@ -272,9 +275,9 @@ subquestion: |2
   
   ### Before you get started
   * Collect names, addresses and phone numbers of the
-    * Person you share custody with (if applicable),
-    * {Caregiver} and
-    * Alternate caregiver
+      * Person you share custody with (if applicable),
+      * {Caregiver} and
+      * Alternate caregiver
   * Collect names and birthdates of your children or wards.
   
   ### Important information to know
@@ -356,15 +359,19 @@ continue button field: Caregiver_info_screen
 question: "Caregiver screens"
 subquestion: |2-
   **Choosing a caregiver**
-  In the next few screens you will be asked to choose the person you want to take care of your child or ward. This person must be 18 years or older.
+  In the next few screens, you will choose the person you want to take care of your child or ward. This person must be at least 18 years old.
   
   **Choosing an alternate caregiver**
-  You will also be asked to chose an alternate, in case your first choice becomes unwilling or unable.
+  You will also choose a backup caregiver. This is someone who can take over if your first choice cannot or does not want to care for your child or ward.
   
   **Parental powers and timeline**
-  You will then have a choice as to which parental powers you want to give them and when they will get those powers. You can only give parental powers that you have yourself. Giving a caregiver parental powers does not take those parental powers away from you. 
+  Next, you will choose which parental powers you want to give the caregiver. You will also choose when the caregiver will get those powers.
   
-  The powers last for one year from the date you sign this document or the date a chosen event happens. You can renew the powers for another year by completing this process again. You can take back the powers at any time by telling the caregiver. 
+  Remember:
+  * You can only give the caregiver powers that you have. Giving the caregiver these powers does not take them away from you.
+  * The powers last for one year. The year starts on the date you sign this form or the date an event you choose happens.
+  * You can renew the powers for another year by completing this process again.
+  * You can take back the powers at any time by telling the caregiver.
 ---
 id: Caregiver Info
 question: |2
