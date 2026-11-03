@@ -21,10 +21,10 @@ subquestion: |2
   continuing.
 field: adult_child_action
 buttons:
-  - Edit this child's information: edit
-  - Restart (re-enter number of children): restart_children
+  - Change the number of children: restart_children
+    color: warning
   - Exit interview: exit
-
+    color: danger
 ---
 id: user address
 sets:
@@ -74,12 +74,12 @@ id: code_1791508172797
 code: |
   users_names = users[0].name.full()
   users_addresses = users[0].address.on_one_line()
-  users_phone_numbers = users[0].phone
+  users_phone_numbers = phone_number_formatted(users[0].phone)
 
   if share_custody:
     users_names += " and " + other_parent[0].name.full()
     users_addresses += "; " + other_parent[0].address.on_one_line()
-    users_phone_numbers += "; " + other_parent[0].phone_number
+    users_phone_numbers += "; " + phone_number_formatted(other_parent[0].phone_number)
 
   
 ---
@@ -150,8 +150,8 @@ code: |
   github_repo_name = 'docassemble-NjPowerOfAttorneyDelegationFillablewithfieldswithfields919'
 ---
 template: interview_short_title
-content: |
-  Delegate authority for your child’s care
+content: |2
+  Delegate temporary authority for your child’s care
 ---
 code: |
   al_form_type = "other_form"
@@ -195,11 +195,14 @@ objects:
   - children: "ALPeopleList.using(ask_number=True, minimum_number=1, complete_attribute='age_checked')"
   - other_parent: "ALPeopleList.using(ask_number=True, target_number=1)"
   - users: "ALPeopleList.using(ask_number=True, target_number=1)"
-  - witnesses: "ALPeopleList.using(ask_number=True, target_number=2)"
+  - witnesses: "ALPeopleList.using(ask_number=True, target_number=2, complete_attribute='info_checked')"
 ---
 sections:
   - intro: Introduction
-  - parties: People
+  - parties: Your Information
+  - children_info: Children 
+  - custody: Custody Information
+  - caregiver_info: Caregiver & Alternate
   - case_details: Appointment Details
   - review_nj_power_of_attorney_delegation_fillablewithfieldswithfields919: Review
   - sign_and_submit: Sign & Print
@@ -210,17 +213,22 @@ comment: |
 id: interview_order_nj_power_of_attorney_delegation_fillablewithfieldswithfields919
 mandatory: True
 code: |
+  nav.set_section('intro')
   al_intro_screen
   nj_power_of_attorney_delegation_fillablewithfieldswithfields919_intro
   screen
   if not screen:
     not_eligible
+  nav.set_section('parties')
+  set_progress(14)
   users.gather()
-  nav.set_section('intro')
   users_address = users[0].address.on_one_line()
   users[0].phone
-  nav.set_section('parties')
+  nav.set_section('children_info')
+  set_progress(30)
   children_confirmed
+  nav.set_section('custody')
+  set_progress(42)
   share_custody
   if share_custody:
     other_parent.gather()
@@ -230,22 +238,24 @@ code: |
   else:
     alternate_consent_screen
   users_names
+  nav.set_section('caregiver_info')
+  set_progress(55)
   Caregiver_info_screen
   caregivers.gather()
   caregiver_name
   caregivers2.gather()
   caregiver2_name
   nav.set_section('case_details')
-  set_progress(25)
+  set_progress(70)
   power_caregiving_yes
   when_powers_start
   if later:
     triggering_event_mental_incapacity_yes
   nav.set_section('review_nj_power_of_attorney_delegation_fillablewithfieldswithfields919')
-  set_progress(50)
+  set_progress(85)
   nj_power_of_attorney_delegation_fillablewithfieldswithfields919_preview_question
   nav.set_section('sign_and_submit')
-  set_progress(75)
+  set_progress(90)
   signature_date
   sign_now
   if sign_now:
@@ -255,34 +265,50 @@ code: |
   store_variables_snapshot( persistent=True, data={ "zip": showifdef("users[0].address.zip"), "reached_interview_end": True, }, )
   set_progress(100)
   nj_power_of_attorney_delegation_fillablewithfieldswithfields919_download
+  
 ---
 id: NJ Power of Attorney Delegation Fillable with fields with fields9 19 intro
 continue button field: nj_power_of_attorney_delegation_fillablewithfieldswithfields919_intro
 question: "NJ Temporary Caregiver Form"
 subquestion: |2
-  Fill out this form if you are a parent, custodian, or guardian of a minor child or ward in NJ wishing to temporarily give parental powers to someone else.
+  Fill out this form if you are a {parent}, {custodian}, or {guardian} of a minor child or {ward} in NJ wishing to temporarily give {parental powers} to someone else.
   
   ### Before you get started
-  * Collect names, addresses and phone numbers of the person you share custody with (if applicable), the caregiver you want to give parental powers to and an alternate caregiver.
+  * Collect names, addresses and phone numbers of the
+      * Person you share custody with (if applicable),
+      * {Caregiver} and
+      * Alternate caregiver
   * Collect names and birthdates of your children or wards.
   
   ### Important information to know
-  * You do not lose parental powers by giving a caregiver parental powers through this form.
-  * You can only give parental powers that you have.
-  * The caregiver you choose must be 18 years or older.
-  * The caregiver will have the powers up to a year from the date of an event you will choose in this form.
-  * The powers can be renewed yearly by repeating this process.
-  * You can take the powers back at any time by telling the caregiver.
+  * You do not lose any of your parental powers when you give a caregiver power to care for your child through this form.
+  * You can only give the caregiver powers that you have.
+  * The caregiver you choose must be at least 18 years old.
+  * The caregiver will have the powers for up to one year from the date of an event you will choose in this form.
+  * You can renew the powers by repeating this process.
+  * You can take back the powers at any time by telling the caregiver.
   
   ### When you are finished
   * Sign the form in the presence of a notary, two witnesses and the person you share custody with (if applicable).
   * Give a copy to the chosen caregiver and keep a copy for yourself.
+
+terms:
+  parent: |
+    A biological or adoptive parent.
+  guardian: |
+    Someone a court picked to care for a child and make choices for them.
+  custodian: |
+    Someone who is not a parent that has been given legal and physical custody by a court.
+  ward: |
+    A child who is appointed a guardian.
+  parental powers: |
+    The rights and responsibilities a parent has to care and make decisions about the health, education, and safety of their child.
+  caregiver: |
+    A person who is 18 years or older that you want to give parental powers to.
 ---
 id: question_1792790939434
-question: "Are you a parent, guardian or custodian?"
-fields:
-  - no label: screen
-    datatype: yesnoradio
+question: "Are you a parent, custodian or guardian?"
+yesno: screen
 ---
 id: your contact information
 question: |
@@ -317,12 +343,12 @@ content: "Add the help text here."
 
 id: not_eligible
 event: not_eligible
-question: |
-  This form may not be right for you
-subquestion: |
+question: |2
+  This form is not right for you
+subquestion: |2
   This form is for parents, guardians, and custodians of a minor child or ward in NJ who want to temporarily give parental powers to someone else.
-
-  Based on your answer, this form may not be the right fit for you.
+  
+  Based on your answer, this form is not right for you.
 buttons:
   - Exit: exit
     url: https://courtformsonline.org/
@@ -332,16 +358,20 @@ id: Caregiver_info_screen
 continue button field: Caregiver_info_screen
 question: "Caregiver screens"
 subquestion: |2-
-  **Choosing a Caregiver**
-  In the next few screens you will be asked to choose the person you want to take care of your child or ward. This person must be 18 years or older.
+  **Choosing a caregiver**
+  In the next few screens, you will choose the person you want to take care of your child or ward. This person must be at least 18 years old.
   
-  **Choosing an Alternate Caregiver**
-  You will also be asked to chose an alternate, in case your first choice becomes unwilling or unable.
+  **Choosing an alternate caregiver**
+  You will also choose a backup caregiver. This is someone who can take over if your first choice cannot or does not want to care for your child or ward.
   
   **Parental powers and timeline**
-  You will then have a choice as to which parental powers you want to give them and when they will get those powers. You can only give parental powers that you have yourself. Giving a caregiver parental powers does not take those parental powers away from you. 
+  Next, you will choose which parental powers you want to give the caregiver. You will also choose when the caregiver will get those powers.
   
-  The powers last for one year from the date you sign this document or the date a chosen event happens. You can renew the powers for another year by completing this process again. You can take back the powers at any time by telling the caregiver. 
+  Remember:
+  * You can only give the caregiver powers that you have. Giving the caregiver these powers does not take them away from you.
+  * The powers last for one year. The year starts on the date you sign this form or the date an event you choose happens.
+  * You can renew the powers for another year by completing this process again.
+  * You can take back the powers at any time by telling the caregiver.
 ---
 id: Caregiver Info
 question: |2
@@ -400,35 +430,35 @@ code: |
 id: Delegated Powers
 question: |2
   % if share_custody and other_parent_will_sign:
-    We allow the Caregiver to
+    We allow the caregiver to
     % else:
-    I allow the Caregiver to
+    I allow the caregiver to
     % endif
 fields:
-  - label: "watch the child for a short time  "
+  - label: "Watch the child for a short time  "
     field: power_caregiving_yes
     datatype: yesno
     help: "An example may be when you go on a vacation, this person will watch your children"
-  - label: "care for the child's basic needs"
+  - label: "Care for the child's basic needs"
     field: power_wellbeing_yes
     datatype: yesno
     help: food, shelter, mental and physical safety, etc.
-  - label: make education decisions
+  - label: Make education decisions
     field: power_education_yes
     datatype: yesno
-    help: "enrollment, access to school records, sign permission slips, any and all decisions about school, including special education"
-  - label: "make medical, dental, and mental health decisions"
+    help: "Enrollment, access to school records, sign permission slips, any and all decisions about school, including special education"
+  - label: "Make medical, dental, and mental health decisions"
     field: power_healthcare_yes
     datatype: yesno
     help: "Including signing of documents, waivers and releases, access to medical records, admitting or discharge from any hospital or medical care facility, meetings with any health care provider, consenting, withholding, changing or withdrawal of procedures."
-  - label: "make travel and related decisions "
+  - label: "Make travel and related decisions "
     field: power_travel_yes
     datatype: yesno
     help: For example, hotel rooms. This applies to both national and international travel.
 
-  - "make financial and legal decisions ": power_financial_yes
+  - "Make financial and legal decisions ": power_financial_yes
     datatype: yesno
-  - "make other decisions ": power_other_yes
+  - "Make other decisions ": power_other_yes
     datatype: yesno
   - label: "All of the above"
     field: power_all_yes
@@ -437,13 +467,20 @@ fields:
 ---
 id: Triggering Events 1
 question: |
-  When should the caregiver powers start?
+  These powers will start
 fields:
   - no label: when_powers_start
     datatype: radio
     choices:
-      - When this is signed: signed
-      - At a later time chosen on the next page: later
+      - When this form is signed: signed
+      - At a later time that I will choose on the next screen: later
+  - note: |
+      ${ collapse_template(one_year) }
+---
+template: one_year
+subject: When will they end?
+content: |
+  One year after your choice above.
 ---
 id: triggering event execution flags
 code: |
@@ -454,17 +491,17 @@ id: Triggering Events
 question: |2
   The caregiver powers should start if I
 fields:
-  - become mentally unable to care for my children: triggering_event_mental_incapacity_yes
+  - Become mentally unable to care for my children: triggering_event_mental_incapacity_yes
     datatype: yesno
-  - become physically unable to care for my children: triggering_event_physical_debilitation_yes
+  - Become physically unable to care for my children: triggering_event_physical_debilitation_yes
     datatype: yesno
-  - "am in immigration detention, removed, or deported": triggering_event_immigration_yes
+  - "Am in immigration detention, removed, or deported": triggering_event_immigration_yes
     datatype: yesno
-  - "am arrested": triggering_event_incarceration_yes
+  - "Am arrested": triggering_event_incarceration_yes
     datatype: yesno
-  - am sent to serve in the military: triggering_event_military_yes
+  - Am sent to serve in the military: triggering_event_military_yes
     datatype: yesno
-  - die and have made no other arrangements: triggering_event_death_yes
+  - Die and have made no other arrangements: triggering_event_death_yes
     datatype: yesno
   - label: "All of the above"
     field: triggering_event_all_yes
@@ -499,28 +536,28 @@ continue button field: other_parent_consent_screen
 question: |2
    ${ other_parent[0].name.familiar() } will not sign the form because they 
 fields:
-  - are deceased: other_parent_deceased_yes
+  - Do not have custody: other_parent_no_custody_yes
     datatype: yesno
-  - do not have custody: other_parent_no_custody_yes
+  - Are mentally or physically unable to consent: other_parent_unable_consent_yes
     datatype: yesno
-  - are mentally or physically unable to consent: other_parent_unable_consent_yes
+  - Have died: other_parent_deceased_yes
     datatype: yesno
-  - label: have not raised or financially supported the child
+  - label: Have not raised or financially supported the child
     field: other_parent_not_involved_yes
     datatype: yesno
-    help: for at least the last 2 years or 1/3 of the child’s life (whichever is less)
-  - cannot be located: other_parent_unknown_yes
+    help: For at least the last 2 years or 1/3 of the child’s life (whichever is less)
+  - Cannot be located: other_parent_unknown_yes
     datatype: yesno
-  - are unreachable: other_parent_unreachable_yes
+  - Are unreachable: other_parent_unreachable_yes
     datatype: yesno
   - label: "Efforts made to reach  ${ other_parent[0].name.familiar() }  "
     field: users_diligent_efforts
     required: False
     show if: other_parent_unreachable_yes
     input type: area
-  - other: other_parent_other_yes
+  - Other: other_parent_other_yes
     datatype: yesno
-  - label: other explanation
+  - label: Other explanation
     field: other_parent_other_text
     input type: area
     required: False
@@ -531,11 +568,11 @@ continue button field: alternate_consent_screen
 question: |2
   I have sole custody, because the other parent
 fields:
-  - is unknown: other_parent_unknown_yes
+  - Is unknown: other_parent_unknown_yes
     datatype: yesno
-  - does not have custody: other_parent_no_custody_yes
+  - Does not have custody: other_parent_no_custody_yes
     datatype: yesno
-  - is deceased: other_parent_deceased_yes
+  - Has died: other_parent_deceased_yes
     datatype: yesno
   - Other: other_parent_other_yes
     datatype: yesno
@@ -616,6 +653,14 @@ fields:
   - code: |
       witnesses[i].address_fields(show_country=False, show_county=False)
 ---
+id: witness complete
+sets:
+  - witnesses[i].info_checked
+code: |
+  witnesses[i].name.first
+  witnesses[i].address.address
+  witnesses[i].info_checked = True
+---
 id: question_1790357534515
 question: |
   Are you with a notary, two witnesses
@@ -648,9 +693,9 @@ sets:
   - "children[i].name.middle"
 question: |2
   % if hasattr(children, 'ask_number') and children.ask_number and children.target_number == 1:
-  Child or Ward
+  Child or ward
   % else:
-  ${ capitalize(ordinal(i)) } Child or Ward
+  ${ capitalize(ordinal(i)) } child or ward
   % endif
 fields:
   - code: |
@@ -1045,7 +1090,7 @@ attachment:
       - "users_phone_numbers": ${ users_phone_numbers }
       - "caregiver_name": ${ caregivers[0].name.full() }
       - "caregiver_address": ${ caregivers[0].address.on_one_line() }
-      - "caregiver_phone_number": ${ caregivers[0].phone_number }
+      - "caregiver_phone_number": ${ phone_number_formatted(caregivers[0].phone_number) }
       - "other_parent_deceased_yes": ${ other_parent_deceased_yes }
       - "other_parent_no_custody_yes": ${ other_parent_no_custody_yes }
       - "other_parent_unable_consent_yes": ${ other_parent_unable_consent_yes }
@@ -1079,7 +1124,7 @@ attachment:
       - "triggering_event_death_yes": ${ triggering_event_death_yes }
       - "caregiver2_name": ${ caregivers2[0].name.full() }
       - "caregiver2_address": ${ caregivers2[0].address.on_one_line() }
-      - "caregiver2_phone_number": ${ caregivers2[0].phone_number  }
+      - "caregiver2_phone_number": ${ phone_number_formatted(caregivers2[0].phone_number)  }
       - "users_signature": ${ users[0].signature_if_final(i) }
       - "users_signature_date": ${ users_signature_date.format() }
       - "other_parent_signature": ${ other_parent[0].signature_if_final(i) }
