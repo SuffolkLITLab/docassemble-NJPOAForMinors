@@ -176,7 +176,7 @@ code: |
   al_interview_languages = ['en']
   github_user = ''
   al_next_steps_enabled = True
-  al_next_steps_document_title = 'Power of Attorney'
+  al_next_steps_document_title = 'Power of attorney'
   al_next_steps_document_purpose = 'Appointment of Parental Powers'
   al_next_steps_help_organization = ''
   al_next_steps_help_url = 'https://pub.njleg.gov/bills/2020/A5000/4640_I1.HTM'
@@ -205,7 +205,7 @@ sections:
   - caregiver_info: Caregiver & Alternate
   - case_details: Appointment Details
   - review_nj_power_of_attorney_delegation_fillablewithfieldswithfields919: Review
-  - sign_and_submit: Sign & Print
+  - sign_and_submit: Print
 ---
 #################### Interview order #####################
 comment: |
@@ -257,12 +257,7 @@ code: |
   nj_power_of_attorney_delegation_fillablewithfieldswithfields919_preview_question
   nav.set_section('sign_and_submit')
   set_progress(90)
-  signature_date
-  sign_now
-  if sign_now:
-    witnesses.gather()
-    basic_questions_signature_flow
-    users_signature_date
+  
   store_variables_snapshot( persistent=True, data={ "zip": showifdef("users[0].address.zip"), "reached_interview_end": True, }, )
   set_progress(100)
   nj_power_of_attorney_delegation_fillablewithfieldswithfields919_download
@@ -668,61 +663,61 @@ fields:
   - code: |
       users[i].name_fields(show_suffix=False) 
 ---
-id: witnesses names
-sets:
-  - "witnesses[i].name.suffix"
-  - "witnesses[i].name.first"
-  - "witnesses[i].name.last"
-  - "witnesses[i].name.middle"
-  - "witnesses[i].address.address"
-  - "witnesses[i].address.city"
-  - "witnesses[i].address.zip"
-  - "witnesses[i].address.unit"
-  - "witnesses[i].address.state"
-  - "witnesses[i].address.country"
-question: |2
-  % if hasattr(witnesses, 'ask_number') and witnesses.ask_number and witnesses.target_number == 1:
-  Name and address of witness
-  % else:
-  ${ capitalize(ordinal(i)) } witness
-  % endif
-fields:
-  - code: |
-      witnesses[i].name_fields(show_suffix=False)
-  - code: |
-      witnesses[i].address_fields(show_country=False, show_county=False)
+# id: witnesses names
+# sets:
+#   - "witnesses[i].name.suffix"
+#   - "witnesses[i].name.first"
+#   - "witnesses[i].name.last"
+#   - "witnesses[i].name.middle"
+#   - "witnesses[i].address.address"
+#   - "witnesses[i].address.city"
+#   - "witnesses[i].address.zip"
+#   - "witnesses[i].address.unit"
+#   - "witnesses[i].address.state"
+#   - "witnesses[i].address.country"
+# question: |2
+#   % if hasattr(witnesses, 'ask_number') and witnesses.ask_number and witnesses.target_number == 1:
+#   Name and address of witness
+#   % else:
+#   ${ capitalize(ordinal(i)) } witness
+#   % endif
+# fields:
+#   - code: |
+#       witnesses[i].name_fields(show_suffix=False)
+#   - code: |
+#       witnesses[i].address_fields(show_country=False, show_county=False)
 ---
-id: witness complete
-sets:
-  - witnesses[i].info_checked
-code: |
-  witnesses[i].name.first
-  witnesses[i].address.address
-  witnesses[i].info_checked = True
+# id: witness complete
+# sets:
+#   - witnesses[i].info_checked
+# code: |
+#   witnesses[i].name.first
+#   witnesses[i].address.address
+#   witnesses[i].info_checked = True
 ---
-id: question_1790357534515
-question: |
-  Are you with a notary, two witnesses
-  % if share_custody and other_parent_will_sign:
-  and ${ other_parent[0].name_full() }
-  % endif
-  and want to sign this document electronically?
-fields:
-  - no label: sign_now
-    datatype: yesnoradio
-
+# id: question_1790357534515
+# question: |
+#   Are you with a notary, two witnesses
+#   % if share_custody and other_parent_will_sign:
+#   and ${ other_parent[0].name_full() }
+#   % endif
+#   and want to sign this document electronically?
+# fields:
+#   - no label: sign_now
+#     datatype: yesnoradio
+#
 ---
-id: code_1791484735545
-code: |
-  users_signature_date = today()
-  witnesses1_signature_date = today()
-  witnesses2_signature_date = today()
-  
-  if share_custody and other_parent_will_sign:
-    other_parent_signature_date = today()
-  
-      
-
+# id: code_1791484735545
+# code: |
+#   users_signature_date = today()
+#   witnesses1_signature_date = today()
+#   witnesses2_signature_date = today()
+#   
+#   if share_custody and other_parent_will_sign:
+#     other_parent_signature_date = today()
+#   
+#       
+#
 ---
 id: children names 1
 sets:
@@ -782,7 +777,13 @@ code: |
     break
   children_confirmed = True
 ---
-
+code: |
+  notary_needed = bool(
+      power_wellbeing_yes or power_education_yes or power_healthcare_yes
+      or power_travel_yes or power_financial_yes or power_other_yes
+      or power_all_yes
+  )
+---
 id: preview nj_power_of_attorney_delegation_fillablewithfieldswithfields919
 question: |
   Preview your form before you sign it
@@ -799,17 +800,17 @@ subquestion: |
   Return to this interview tab to continue and sign your form.
 continue button field: nj_power_of_attorney_delegation_fillablewithfieldswithfields919_preview_question
 ---
-code: |
-  signature_fields = ['users[0].signature']
-  
-  if share_custody and other_parent_will_sign:
-      signature_fields.append('other_parent[0].signature')
-  
-  signature_fields.extend([
-      'witnesses[0].signature',
-      'witnesses[1].signature'
-  ])
-  
+# code: |
+#   signature_fields = ['users[0].signature']
+#   
+#   if share_custody and other_parent_will_sign:
+#       signature_fields.append('other_parent[0].signature')
+#   
+#   signature_fields.extend([
+#       'witnesses[0].signature',
+#       'witnesses[1].signature'
+#   ])
+#   
 ---
 id: nj power of attorney delegation fillablewithfieldswithfields919 review screen
 event: review_nj_power_of_attorney_delegation_fillablewithfieldswithfields919
@@ -862,11 +863,11 @@ review:
 
   - Edit: power_caregiving_yes
     button: |
-      **Assigned Parental Powers**
+      **Parental Powers**
 
-      Caregiving power granted: ${ word(yesno(power_caregiving_yes)) if defined('power_caregiving_yes') else '' }
+      Short term power granted: ${ word(yesno(power_caregiving_yes)) if defined('power_caregiving_yes') else '' }
 
-      Well-being power granted: ${ word(yesno(power_wellbeing_yes)) if defined('power_wellbeing_yes') else '' }
+      Basic needs power granted: ${ word(yesno(power_wellbeing_yes)) if defined('power_wellbeing_yes') else '' }
 
       Education power granted: ${ word(yesno(power_education_yes)) if defined('power_education_yes') else '' }
 
@@ -879,22 +880,49 @@ review:
       Other powers granted: ${ word(yesno(power_other_yes)) if defined('power_other_yes') else '' }
   - Edit: triggering_event_execution_yes
     button: |
-      **Triggering Events**
+      **Starting Events**
 
-      Event execution triggers authority: ${ word(yesno(triggering_event_execution_yes)) if defined('triggering_event_execution_yes') else '' }
+      Sign form: ${ word(yesno(triggering_event_execution_yes)) if defined('triggering_event_execution_yes') else '' }
 
-      Mental incapacity triggers authority: ${ word(yesno(triggering_event_mental_incapacity_yes)) if defined('triggering_event_mental_incapacity_yes') else '' }
+      Mentally unable: ${ word(yesno(triggering_event_mental_incapacity_yes)) if defined('triggering_event_mental_incapacity_yes') else '' }
 
-      Physical debilitation triggers authority: ${ word(yesno(triggering_event_physical_debilitation_yes)) if defined('triggering_event_physical_debilitation_yes') else '' }
+      Physically unable: ${ word(yesno(triggering_event_physical_debilitation_yes)) if defined('triggering_event_physical_debilitation_yes') else '' }
 
-      Immigration triggers authority: ${ word(yesno(triggering_event_immigration_yes)) if defined('triggering_event_immigration_yes') else '' }
+      Immigration: ${ word(yesno(triggering_event_immigration_yes)) if defined('triggering_event_immigration_yes') else '' }
 
-      Incarceration triggers authority: ${ word(yesno(triggering_event_incarceration_yes)) if defined('triggering_event_incarceration_yes') else '' }
+      Arrested: ${ word(yesno(triggering_event_incarceration_yes)) if defined('triggering_event_incarceration_yes') else '' }
 
-      Military deployment triggers authority: ${ word(yesno(triggering_event_military_yes)) if defined('triggering_event_military_yes') else '' }
+      Military: ${ word(yesno(triggering_event_military_yes)) if defined('triggering_event_military_yes') else '' }
 
-      Death triggers authority: ${ word(yesno(triggering_event_death_yes)) if defined('triggering_event_death_yes') else '' }
+      Death: ${ word(yesno(triggering_event_death_yes)) if defined('triggering_event_death_yes') else '' }
 
+  - Edit: share_custody
+    button: |
+      **Do you share custody?**
+
+      ${ word(yesno(share_custody)) if defined('share_custody') else '' }
+
+  - Edit: other_parent_will_sign
+    show if: show_other_parent_sign_review
+    button: |
+      **Will ${ other_parent[0].name.familiar() } sign?**
+
+      ${ word(yesno(other_parent_will_sign)) if defined('other_parent_will_sign') else '' }
+
+  - Edit: other_parent_consent_screen
+    show if: show_other_parent_consent_review
+    button: |
+      **Why ${ other_parent[0].name.familiar() } will not sign**
+
+      Edit the reasons
+
+  - Edit: alternate_consent_screen
+    show if: show_sole_custody_review
+    button: |
+      **Why you have sole custody**
+
+      Edit the reasons
+      
   - Edit: users[0].signature
     button: |
       **Your signature**
@@ -925,10 +953,19 @@ review:
 #   )
 #   show_sole_custody_review = bool(not share_custody)
 ---
+reconsider: True
+code: |
+  show_other_parent_sign_review = bool(defined('share_custody') and share_custody)
+  show_other_parent_consent_review = bool(
+      defined('share_custody') and share_custody
+      and defined('other_parent_will_sign') and not other_parent_will_sign
+  )
+  show_sole_custody_review = bool(defined('share_custody') and not share_custody)
+---
 id: edit caregivers
 continue button field: caregivers.revisit
 question: |
-  Edit caregivers
+  Edit caregiver information
 subquestion: |
   ${ caregivers.table }
 
@@ -952,7 +989,7 @@ confirm: True
 id: edit children
 continue button field: children.revisit
 question: |
-  Edit children
+  Edit children information
 subquestion: |
   ${ children.table }
 
@@ -973,7 +1010,7 @@ confirm: True
 id: edit other parent
 continue button field: other_parent.revisit
 question: |
-  Edit other_parent
+  Edit person you share custody with information
 subquestion: |
   ${ other_parent.table }
 
@@ -994,32 +1031,32 @@ edit:
   - phone_number
 confirm: True
 ---
-id: edit witnesses
-continue button field: witnesses.revisit
-question: |
-  Edit witnesses
-subquestion: |
-  ${ witnesses.table }
-
-  ${ witnesses.add_action() }
+# id: edit witnesses
+# continue button field: witnesses.revisit
+# question: |
+#   Edit witnesses
+# subquestion: |
+#   ${ witnesses.table }
+#
+#   ${ witnesses.add_action() }
 ---
-table: witnesses.table
-rows: witnesses
-columns:
-  - Name: |
-      row_item.name_full() if defined("row_item.name.first") else ""
-  - Address: |
-      row_item.address.on_one_line() if defined("row_item.address.address") else ""
-
-edit:
-  - name.first
-  - address.address
-confirm: True
+# table: witnesses.table
+# rows: witnesses
+# columns:
+#   - Name: |
+#       row_item.name_full() if defined("row_item.name.first") else ""
+#   - Address: |
+#       row_item.address.on_one_line() if defined("row_item.address.address") else ""
+#
+# edit:
+#   - name.first
+#   - address.address
+# confirm: True
 ---
 id: edit users
 continue button field: users.revisit
 question: |
-  Edit users
+  Edit your information
 subquestion: |
   ${ users.table }
 
@@ -1033,12 +1070,34 @@ columns:
   - Address: |
       row_item.address.on_one_line() if defined("row_item.address.address") else ""
   - Phone number: |
-      row_item.phone_number if defined("row_item.phone_number") else ""
+      phone_number_formatted(row_item.phone) if defined("row_item.phone") else ""
+edit:
+  - name.first
+  - address.address
+  - phone
+confirm: True
+---
+id: edit caregivers2
+continue button field: caregivers2.revisit
+question: |
+  Edit alternate caregiver information
+subquestion: |
+  ${ caregivers2.table }
+---
+table: caregivers2.table
+rows: caregivers2
+columns:
+  - Name: |
+      row_item.name_full() if defined("row_item.name.first") else ""
+  - Address: |
+      row_item.address.on_one_line() if defined("row_item.address.address") else ""
+  - Phone number: |
+      phone_number_formatted(row_item.phone_number) if defined("row_item.phone_number") else ""
 edit:
   - name.first
   - address.address
   - phone_number
-confirm: True
+delete buttons: False
 ---
 id: download nj_power_of_attorney_delegation_fillablewithfieldswithfields919
 event: nj_power_of_attorney_delegation_fillablewithfieldswithfields919_download
@@ -1046,9 +1105,9 @@ question: |2
   Form Complete!
 subquestion: |2
   Thank you ${users}. Your form is ready to download and print.  
-  % if not sign_now:
-  **Important:** You chose not to sign electronically. You must print this form and sign it in front of a notary, plus 2 witnesses${ (", and " + other_parent[0].name_full()) if (share_custody and other_parent_will_sign) else "" } before you are finished.
-  % endif
+  
+  **Important:** You are not finished. You must print this form and sign it in front of two witnesses${ (", a notary," if (share_custody and other_parent_will_sign) else " and a notary") if notary_needed else "" }${ " and " + other_parent[0].name_full() if (share_custody and other_parent_will_sign) else "" } before you are finished.
+  
   
   Use the options on this page to view, download and send your form. Use the
   "Edit answers" button to fix any mistakes.
@@ -1062,7 +1121,12 @@ progress: 100
 ---
 # ALDocument objects specify the metadata for each template
 objects:
-  - nj_power_of_attorney_delegation_fillablewithfieldswithfields919_attachment: ALDocument.using(filename="nj_power_of_attorney_delegation_fillablewithfieldswithfields919", title="Power of Attorney", enabled=True, has_addendum=True)
+  - nj_power_of_attorney_delegation_fillablewithfieldswithfields919_attachment: ALDocument.using(
+        filename="nj_power_of_attorney_delegation_fillablewithfieldswithfields919",
+        title="Power of attorney",
+        enabled=True,
+        has_addendum=True
+      )
 ---
 # Bundles group the ALDocuments into separate downloads, such as for court and for the user
 objects:
