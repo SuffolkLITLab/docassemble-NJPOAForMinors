@@ -176,7 +176,7 @@ code: |
   al_interview_languages = ['en']
   github_user = ''
   al_next_steps_enabled = True
-  al_next_steps_document_title = 'Power of Attorney'
+  al_next_steps_document_title = 'Power of attorney'
   al_next_steps_document_purpose = 'Appointment of Parental Powers'
   al_next_steps_help_organization = ''
   al_next_steps_help_url = 'https://pub.njleg.gov/bills/2020/A5000/4640_I1.HTM'
@@ -205,7 +205,7 @@ sections:
   - caregiver_info: Caregiver & Alternate
   - case_details: Appointment Details
   - review_nj_power_of_attorney_delegation_fillablewithfieldswithfields919: Review
-  - sign_and_submit: Sign & Print
+  - sign_and_submit: Print
 ---
 #################### Interview order #####################
 comment: |
@@ -1047,7 +1047,8 @@ question: |2
   Form Complete!
 subquestion: |2
   Thank you ${users}. Your form is ready to download and print.  
-  **Important:** You are not finished. You must print this form and sign it in front of 2 witnesses${ " and a notary" if notary_needed else "" }${ ", and " + other_parent[0].name_full() + " must also sign it" if (share_custody and other_parent_will_sign) else "" } before you are finished.
+  
+  **Important:** You are not finished. You must print this form and sign it in front of two witnesses${ (", a notary," if (share_custody and other_parent_will_sign) else " and a notary") if notary_needed else "" }${ " and " + other_parent[0].name_full() if (share_custody and other_parent_will_sign) else "" } before you are finished.
   
   
   Use the options on this page to view, download and send your form. Use the
@@ -1062,7 +1063,12 @@ progress: 100
 ---
 # ALDocument objects specify the metadata for each template
 objects:
-  - nj_power_of_attorney_delegation_fillablewithfieldswithfields919_attachment: ALDocument.using(filename="nj_power_of_attorney_delegation_fillablewithfieldswithfields919", title="Power of Attorney", enabled=True, has_addendum=True)
+  - nj_power_of_attorney_delegation_fillablewithfieldswithfields919_attachment: ALDocument.using(
+        filename="nj_power_of_attorney_delegation_fillablewithfieldswithfields919",
+        title="Power of attorney",
+        enabled=True,
+        has_addendum=True
+      )
 ---
 # Bundles group the ALDocuments into separate downloads, such as for court and for the user
 objects:
