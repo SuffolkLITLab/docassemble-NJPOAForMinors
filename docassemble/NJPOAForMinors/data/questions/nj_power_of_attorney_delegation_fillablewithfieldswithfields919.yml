@@ -257,12 +257,7 @@ code: |
   nj_power_of_attorney_delegation_fillablewithfieldswithfields919_preview_question
   nav.set_section('sign_and_submit')
   set_progress(90)
-  signature_date
-  sign_now
-  if sign_now:
-    witnesses.gather()
-    basic_questions_signature_flow
-    users_signature_date
+  
   store_variables_snapshot( persistent=True, data={ "zip": showifdef("users[0].address.zip"), "reached_interview_end": True, }, )
   set_progress(100)
   nj_power_of_attorney_delegation_fillablewithfieldswithfields919_download
@@ -668,61 +663,61 @@ fields:
   - code: |
       users[i].name_fields(show_suffix=False) 
 ---
-id: witnesses names
-sets:
-  - "witnesses[i].name.suffix"
-  - "witnesses[i].name.first"
-  - "witnesses[i].name.last"
-  - "witnesses[i].name.middle"
-  - "witnesses[i].address.address"
-  - "witnesses[i].address.city"
-  - "witnesses[i].address.zip"
-  - "witnesses[i].address.unit"
-  - "witnesses[i].address.state"
-  - "witnesses[i].address.country"
-question: |2
-  % if hasattr(witnesses, 'ask_number') and witnesses.ask_number and witnesses.target_number == 1:
-  Name and address of witness
-  % else:
-  ${ capitalize(ordinal(i)) } witness
-  % endif
-fields:
-  - code: |
-      witnesses[i].name_fields(show_suffix=False)
-  - code: |
-      witnesses[i].address_fields(show_country=False, show_county=False)
+# id: witnesses names
+# sets:
+#   - "witnesses[i].name.suffix"
+#   - "witnesses[i].name.first"
+#   - "witnesses[i].name.last"
+#   - "witnesses[i].name.middle"
+#   - "witnesses[i].address.address"
+#   - "witnesses[i].address.city"
+#   - "witnesses[i].address.zip"
+#   - "witnesses[i].address.unit"
+#   - "witnesses[i].address.state"
+#   - "witnesses[i].address.country"
+# question: |2
+#   % if hasattr(witnesses, 'ask_number') and witnesses.ask_number and witnesses.target_number == 1:
+#   Name and address of witness
+#   % else:
+#   ${ capitalize(ordinal(i)) } witness
+#   % endif
+# fields:
+#   - code: |
+#       witnesses[i].name_fields(show_suffix=False)
+#   - code: |
+#       witnesses[i].address_fields(show_country=False, show_county=False)
 ---
-id: witness complete
-sets:
-  - witnesses[i].info_checked
-code: |
-  witnesses[i].name.first
-  witnesses[i].address.address
-  witnesses[i].info_checked = True
+# id: witness complete
+# sets:
+#   - witnesses[i].info_checked
+# code: |
+#   witnesses[i].name.first
+#   witnesses[i].address.address
+#   witnesses[i].info_checked = True
 ---
-id: question_1790357534515
-question: |
-  Are you with a notary, two witnesses
-  % if share_custody and other_parent_will_sign:
-  and ${ other_parent[0].name_full() }
-  % endif
-  and want to sign this document electronically?
-fields:
-  - no label: sign_now
-    datatype: yesnoradio
-
+# id: question_1790357534515
+# question: |
+#   Are you with a notary, two witnesses
+#   % if share_custody and other_parent_will_sign:
+#   and ${ other_parent[0].name_full() }
+#   % endif
+#   and want to sign this document electronically?
+# fields:
+#   - no label: sign_now
+#     datatype: yesnoradio
+#
 ---
-id: code_1791484735545
-code: |
-  users_signature_date = today()
-  witnesses1_signature_date = today()
-  witnesses2_signature_date = today()
-  
-  if share_custody and other_parent_will_sign:
-    other_parent_signature_date = today()
-  
-      
-
+# id: code_1791484735545
+# code: |
+#   users_signature_date = today()
+#   witnesses1_signature_date = today()
+#   witnesses2_signature_date = today()
+#   
+#   if share_custody and other_parent_will_sign:
+#     other_parent_signature_date = today()
+#   
+#       
+#
 ---
 id: children names 1
 sets:
@@ -782,7 +777,13 @@ code: |
     break
   children_confirmed = True
 ---
-
+code: |
+  notary_needed = bool(
+      power_wellbeing_yes or power_education_yes or power_healthcare_yes
+      or power_travel_yes or power_financial_yes or power_other_yes
+      or power_all_yes
+  )
+---
 id: preview nj_power_of_attorney_delegation_fillablewithfieldswithfields919
 question: |
   Preview your form before you sign it
@@ -799,17 +800,17 @@ subquestion: |
   Return to this interview tab to continue and sign your form.
 continue button field: nj_power_of_attorney_delegation_fillablewithfieldswithfields919_preview_question
 ---
-code: |
-  signature_fields = ['users[0].signature']
-  
-  if share_custody and other_parent_will_sign:
-      signature_fields.append('other_parent[0].signature')
-  
-  signature_fields.extend([
-      'witnesses[0].signature',
-      'witnesses[1].signature'
-  ])
-  
+# code: |
+#   signature_fields = ['users[0].signature']
+#   
+#   if share_custody and other_parent_will_sign:
+#       signature_fields.append('other_parent[0].signature')
+#   
+#   signature_fields.extend([
+#       'witnesses[0].signature',
+#       'witnesses[1].signature'
+#   ])
+#   
 ---
 id: nj power of attorney delegation fillablewithfieldswithfields919 review screen
 event: review_nj_power_of_attorney_delegation_fillablewithfieldswithfields919
@@ -994,27 +995,27 @@ edit:
   - phone_number
 confirm: True
 ---
-id: edit witnesses
-continue button field: witnesses.revisit
-question: |
-  Edit witnesses
-subquestion: |
-  ${ witnesses.table }
-
-  ${ witnesses.add_action() }
+# id: edit witnesses
+# continue button field: witnesses.revisit
+# question: |
+#   Edit witnesses
+# subquestion: |
+#   ${ witnesses.table }
+#
+#   ${ witnesses.add_action() }
 ---
-table: witnesses.table
-rows: witnesses
-columns:
-  - Name: |
-      row_item.name_full() if defined("row_item.name.first") else ""
-  - Address: |
-      row_item.address.on_one_line() if defined("row_item.address.address") else ""
-
-edit:
-  - name.first
-  - address.address
-confirm: True
+# table: witnesses.table
+# rows: witnesses
+# columns:
+#   - Name: |
+#       row_item.name_full() if defined("row_item.name.first") else ""
+#   - Address: |
+#       row_item.address.on_one_line() if defined("row_item.address.address") else ""
+#
+# edit:
+#   - name.first
+#   - address.address
+# confirm: True
 ---
 id: edit users
 continue button field: users.revisit
@@ -1046,9 +1047,8 @@ question: |2
   Form Complete!
 subquestion: |2
   Thank you ${users}. Your form is ready to download and print.  
-  % if not sign_now:
-  **Important:** You chose not to sign electronically. You must print this form and sign it in front of a notary, plus 2 witnesses${ (", and " + other_parent[0].name_full()) if (share_custody and other_parent_will_sign) else "" } before you are finished.
-  % endif
+  **Important:** You are not finished. You must print this form and sign it in front of 2 witnesses${ " and a notary" if notary_needed else "" }${ ", and " + other_parent[0].name_full() + " must also sign it" if (share_custody and other_parent_will_sign) else "" } before you are finished.
+  
   
   Use the options on this page to view, download and send your form. Use the
   "Edit answers" button to fix any mistakes.
