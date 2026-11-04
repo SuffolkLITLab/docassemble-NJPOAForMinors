@@ -863,11 +863,11 @@ review:
 
   - Edit: power_caregiving_yes
     button: |
-      **Assigned Parental Powers**
+      **Parental Powers**
 
-      Caregiving power granted: ${ word(yesno(power_caregiving_yes)) if defined('power_caregiving_yes') else '' }
+      Short term power granted: ${ word(yesno(power_caregiving_yes)) if defined('power_caregiving_yes') else '' }
 
-      Well-being power granted: ${ word(yesno(power_wellbeing_yes)) if defined('power_wellbeing_yes') else '' }
+      Basic needs power granted: ${ word(yesno(power_wellbeing_yes)) if defined('power_wellbeing_yes') else '' }
 
       Education power granted: ${ word(yesno(power_education_yes)) if defined('power_education_yes') else '' }
 
@@ -880,22 +880,49 @@ review:
       Other powers granted: ${ word(yesno(power_other_yes)) if defined('power_other_yes') else '' }
   - Edit: triggering_event_execution_yes
     button: |
-      **Triggering Events**
+      **Starting Events**
 
-      Event execution triggers authority: ${ word(yesno(triggering_event_execution_yes)) if defined('triggering_event_execution_yes') else '' }
+      Sign form: ${ word(yesno(triggering_event_execution_yes)) if defined('triggering_event_execution_yes') else '' }
 
-      Mental incapacity triggers authority: ${ word(yesno(triggering_event_mental_incapacity_yes)) if defined('triggering_event_mental_incapacity_yes') else '' }
+      Mentally unable: ${ word(yesno(triggering_event_mental_incapacity_yes)) if defined('triggering_event_mental_incapacity_yes') else '' }
 
-      Physical debilitation triggers authority: ${ word(yesno(triggering_event_physical_debilitation_yes)) if defined('triggering_event_physical_debilitation_yes') else '' }
+      Physically unable: ${ word(yesno(triggering_event_physical_debilitation_yes)) if defined('triggering_event_physical_debilitation_yes') else '' }
 
-      Immigration triggers authority: ${ word(yesno(triggering_event_immigration_yes)) if defined('triggering_event_immigration_yes') else '' }
+      Immigration: ${ word(yesno(triggering_event_immigration_yes)) if defined('triggering_event_immigration_yes') else '' }
 
-      Incarceration triggers authority: ${ word(yesno(triggering_event_incarceration_yes)) if defined('triggering_event_incarceration_yes') else '' }
+      Arrested: ${ word(yesno(triggering_event_incarceration_yes)) if defined('triggering_event_incarceration_yes') else '' }
 
-      Military deployment triggers authority: ${ word(yesno(triggering_event_military_yes)) if defined('triggering_event_military_yes') else '' }
+      Military: ${ word(yesno(triggering_event_military_yes)) if defined('triggering_event_military_yes') else '' }
 
-      Death triggers authority: ${ word(yesno(triggering_event_death_yes)) if defined('triggering_event_death_yes') else '' }
+      Death: ${ word(yesno(triggering_event_death_yes)) if defined('triggering_event_death_yes') else '' }
 
+  - Edit: share_custody
+    button: |
+      **Do you share custody?**
+
+      ${ word(yesno(share_custody)) if defined('share_custody') else '' }
+
+  - Edit: other_parent_will_sign
+    show if: show_other_parent_sign_review
+    button: |
+      **Will ${ other_parent[0].name.familiar() } sign?**
+
+      ${ word(yesno(other_parent_will_sign)) if defined('other_parent_will_sign') else '' }
+
+  - Edit: other_parent_consent_screen
+    show if: show_other_parent_consent_review
+    button: |
+      **Why ${ other_parent[0].name.familiar() } will not sign**
+
+      Edit the reasons
+
+  - Edit: alternate_consent_screen
+    show if: show_sole_custody_review
+    button: |
+      **Why you have sole custody**
+
+      Edit the reasons
+      
   - Edit: users[0].signature
     button: |
       **Your signature**
@@ -926,10 +953,19 @@ review:
 #   )
 #   show_sole_custody_review = bool(not share_custody)
 ---
+reconsider: True
+code: |
+  show_other_parent_sign_review = bool(defined('share_custody') and share_custody)
+  show_other_parent_consent_review = bool(
+      defined('share_custody') and share_custody
+      and defined('other_parent_will_sign') and not other_parent_will_sign
+  )
+  show_sole_custody_review = bool(defined('share_custody') and not share_custody)
+---
 id: edit caregivers
 continue button field: caregivers.revisit
 question: |
-  Edit caregivers
+  Edit caregiver information
 subquestion: |
   ${ caregivers.table }
 
@@ -953,7 +989,7 @@ confirm: True
 id: edit children
 continue button field: children.revisit
 question: |
-  Edit children
+  Edit children information
 subquestion: |
   ${ children.table }
 
@@ -974,7 +1010,7 @@ confirm: True
 id: edit other parent
 continue button field: other_parent.revisit
 question: |
-  Edit other_parent
+  Edit person you share custody with information
 subquestion: |
   ${ other_parent.table }
 
@@ -1020,7 +1056,7 @@ confirm: True
 id: edit users
 continue button field: users.revisit
 question: |
-  Edit users
+  Edit your information
 subquestion: |
   ${ users.table }
 
@@ -1034,12 +1070,34 @@ columns:
   - Address: |
       row_item.address.on_one_line() if defined("row_item.address.address") else ""
   - Phone number: |
-      row_item.phone_number if defined("row_item.phone_number") else ""
+      phone_number_formatted(row_item.phone) if defined("row_item.phone") else ""
+edit:
+  - name.first
+  - address.address
+  - phone
+confirm: True
+---
+id: edit caregivers2
+continue button field: caregivers2.revisit
+question: |
+  Edit alternate caregiver information
+subquestion: |
+  ${ caregivers2.table }
+---
+table: caregivers2.table
+rows: caregivers2
+columns:
+  - Name: |
+      row_item.name_full() if defined("row_item.name.first") else ""
+  - Address: |
+      row_item.address.on_one_line() if defined("row_item.address.address") else ""
+  - Phone number: |
+      phone_number_formatted(row_item.phone_number) if defined("row_item.phone_number") else ""
 edit:
   - name.first
   - address.address
   - phone_number
-confirm: True
+delete buttons: False
 ---
 id: download nj_power_of_attorney_delegation_fillablewithfieldswithfields919
 event: nj_power_of_attorney_delegation_fillablewithfieldswithfields919_download
