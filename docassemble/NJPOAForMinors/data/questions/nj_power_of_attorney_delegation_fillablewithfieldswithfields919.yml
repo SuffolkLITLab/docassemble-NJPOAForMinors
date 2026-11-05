@@ -114,9 +114,9 @@ metadata:
   estimated_completion_minutes: ""
   estimated_completion_delta: ""
   LIST_topics:
-    - "CO-00-00-00-00"
+    - "ES-03-03-05-00"
   tags:
-    - "CO-00-00-00-00"
+    - "ES-03-03-05-00"
   authors:
     - Court Forms Online
   original_form: []
@@ -161,7 +161,7 @@ initial: True
 code: |
   # Managed by the graphical AssemblyLine settings editor.
   allowed_courts = []
-  AL_ORGANIZATION_TITLE = ''
+  AL_ORGANIZATION_TITLE = 'CourtFormsOnline'
   AL_ORGANIZATION_HOMEPAGE = ''
   AL_DEFAULT_LANGUAGE = 'en'
   AL_DEFAULT_OVERFLOW_MESSAGE = '...'
@@ -204,18 +204,18 @@ sections:
   - custody: Custody Information
   - caregiver_info: Caregiver & Alternate
   - case_details: Appointment Details
-  - review_nj_power_of_attorney_delegation_fillablewithfieldswithfields919: Review
+  - review_nj_power_of_attorney_delegation_main: Review
   - sign_and_submit: Print
 ---
 #################### Interview order #####################
 comment: |
   Controls order and branching logic for questions specific to this form
-id: interview_order_nj_power_of_attorney_delegation_fillablewithfieldswithfields919
+id: interview_order_nj_power_of_attorney_delegation_main
 mandatory: True
 code: |
   nav.set_section('intro')
   al_intro_screen
-  nj_power_of_attorney_delegation_fillablewithfieldswithfields919_intro
+  nj_power_of_attorney_delegation_main_intro
   screen
   if not screen:
     not_eligible
@@ -252,19 +252,19 @@ code: |
   when_powers_start
   if later:
     triggering_event_mental_incapacity_yes
-  nav.set_section('review_nj_power_of_attorney_delegation_fillablewithfieldswithfields919')
+  nav.set_section('review_nj_power_of_attorney_delegation_main')
   set_progress(85)
-  nj_power_of_attorney_delegation_fillablewithfieldswithfields919_preview_question
+  nj_power_of_attorney_delegation_main_preview_question
   nav.set_section('sign_and_submit')
   set_progress(90)
   
   store_variables_snapshot( persistent=True, data={ "zip": showifdef("users[0].address.zip"), "reached_interview_end": True, }, )
   set_progress(100)
-  nj_power_of_attorney_delegation_fillablewithfieldswithfields919_download
+  nj_power_of_attorney_delegation_main_download
   
 ---
 id: NJ Power of Attorney Delegation Fillable with fields with fields9 19 intro
-continue button field: nj_power_of_attorney_delegation_fillablewithfieldswithfields919_intro
+continue button field: nj_power_of_attorney_delegation_main_intro
 question: "NJ Temporary Caregiver Form"
 subquestion: |2
   Fill out this form if you are a {parent}, {custodian}, or {guardian} of a minor child or {ward} in NJ wishing to temporarily give {parental powers} to someone else.
@@ -304,7 +304,9 @@ terms:
 ---
 id: question_1792790939434
 question: "Are you a parent, custodian or guardian?"
-yesno: screen
+fields:
+  - no label: screen
+    datatype: yesnoradio
 ---
 id: your contact information
 question: |
@@ -784,7 +786,7 @@ code: |
       or power_all_yes
   )
 ---
-id: preview nj_power_of_attorney_delegation_fillablewithfieldswithfields919
+id: preview nj_power_of_attorney_delegation_main
 question: |
   Preview your form before you sign it
 subquestion: |
@@ -795,10 +797,10 @@ subquestion: |
   Open the form preview in a new tab. Use the "Edit answers" button to edit your
   answers.
 
-  ${ action_button_html(url_action('review_nj_power_of_attorney_delegation_fillablewithfieldswithfields919'), label=word('Edit answers'), color='info') }
+  ${ action_button_html(url_action('review_nj_power_of_attorney_delegation_main'), label=word('Edit answers'), color='info') }
 
   Return to this interview tab to continue and sign your form.
-continue button field: nj_power_of_attorney_delegation_fillablewithfieldswithfields919_preview_question
+continue button field: nj_power_of_attorney_delegation_main_preview_question
 ---
 # code: |
 #   signature_fields = ['users[0].signature']
@@ -813,7 +815,7 @@ continue button field: nj_power_of_attorney_delegation_fillablewithfieldswithfie
 #   
 ---
 id: nj power of attorney delegation fillablewithfieldswithfields919 review screen
-event: review_nj_power_of_attorney_delegation_fillablewithfieldswithfields919
+event: review_nj_power_of_attorney_delegation_main
 question: |
   Review your answers
 review:
@@ -1099,8 +1101,8 @@ edit:
   - phone_number
 delete buttons: False
 ---
-id: download nj_power_of_attorney_delegation_fillablewithfieldswithfields919
-event: nj_power_of_attorney_delegation_fillablewithfieldswithfields919_download
+id: download nj_power_of_attorney_delegation_main
+event: nj_power_of_attorney_delegation_main_download
 question: |2
   Form Complete!
 subquestion: |2
@@ -1112,7 +1114,7 @@ subquestion: |2
   Use the options on this page to view, download and send your form. Use the
   "Edit answers" button to fix any mistakes.
   
-  ${ action_button_html(url_action('review_nj_power_of_attorney_delegation_fillablewithfieldswithfields919'), label=word('Edit answers'), color='info') }
+  ${ action_button_html(url_action('review_nj_power_of_attorney_delegation_main'), label=word('Edit answers'), color='info') }
   
   ${ al_user_bundle.download_list_html() }
   
@@ -1121,8 +1123,8 @@ progress: 100
 ---
 # ALDocument objects specify the metadata for each template
 objects:
-  - nj_power_of_attorney_delegation_fillablewithfieldswithfields919_attachment: ALDocument.using(
-        filename="nj_power_of_attorney_delegation_fillablewithfieldswithfields919",
+  - nj_power_of_attorney_delegation_main_attachment: ALDocument.using(
+        filename="nj_power_of_attorney_delegation_main",
         title="Power of attorney",
         enabled=True,
         has_addendum=True
@@ -1130,20 +1132,20 @@ objects:
 ---
 # Bundles group the ALDocuments into separate downloads, such as for court and for the user
 objects:
-  - al_user_bundle: ALDocumentBundle.using(elements=[nj_power_of_attorney_delegation_fillablewithfieldswithfields919_attachment, nj_power_of_attorney_delegation_fillablewithfieldswithfields919_next_steps_2], filename="nj_power_of_attorney_delegation_fillablewithfieldswithfields919", title="All documents", enabled=True)
-  - al_recipient_bundle: ALDocumentBundle.using(elements=[nj_power_of_attorney_delegation_fillablewithfieldswithfields919_attachment], filename="nj_power_of_attorney_delegation_fillablewithfieldswithfields919", title="All documents", enabled=True)
+  - al_user_bundle: ALDocumentBundle.using(elements=[nj_power_of_attorney_delegation_main_attachment, nj_power_of_attorney_delegation_fillablewithfieldswithfields919_next_steps_2], filename="nj_power_of_attorney_delegation_documents", title="All documents", enabled=True)
+  - al_recipient_bundle: ALDocumentBundle.using(elements=[nj_power_of_attorney_delegation_main_attachment], filename="nj_power_of_attorney_delegation_documents", title="All documents", enabled=True)
 ---
 code: |
-  nj_power_of_attorney_delegation_fillablewithfieldswithfields919_attachment.overflow_fields.initializeObject('children', ALAddendumField, field_name='children')
-  nj_power_of_attorney_delegation_fillablewithfieldswithfields919_attachment.overflow_fields['children'].overflow_trigger = 3 if len(children) > 4 else 4
-  nj_power_of_attorney_delegation_fillablewithfieldswithfields919_attachment.overflow_fields['children'].label = "Additional Children"
-  nj_power_of_attorney_delegation_fillablewithfieldswithfields919_attachment.overflow_fields['children'].headers = [
+  nj_power_of_attorney_delegation_main_attachment.overflow_fields.initializeObject('children', ALAddendumField, field_name='children')
+  nj_power_of_attorney_delegation_main_attachment.overflow_fields['children'].overflow_trigger = 3 if len(children) > 4 else 4
+  nj_power_of_attorney_delegation_main_attachment.overflow_fields['children'].label = "Additional Children"
+  nj_power_of_attorney_delegation_main_attachment.overflow_fields['children'].headers = [
     {"name": "Name"},
     {"birthdate": "Birthdate"},
   ]
-  nj_power_of_attorney_delegation_fillablewithfieldswithfields919_attachment.overflow_fields.gathered = True
+  nj_power_of_attorney_delegation_main_attachment.overflow_fields.gathered = True
 ---
-template: nj_power_of_attorney_delegation_fillablewithfieldswithfields919_attachment.title
+template: nj_power_of_attorney_delegation_main_attachment.title
 content: |
   NJ Power of Attorney Delegation Fillable-with-fields-with-fields9-19
 ---
@@ -1166,11 +1168,11 @@ content: |
 
 ---
 attachment:
-  name: nj power of attorney delegation fillablewithfieldswithfields919
-  filename: nj_power_of_attorney_delegation_fillablewithfieldswithfields919
-  variable name: nj_power_of_attorney_delegation_fillablewithfieldswithfields919_attachment[i]
+  name: NJ Power of Attorney Delegation
+  filename: nj_power_of_attorney_delegation_main
+  variable name: nj_power_of_attorney_delegation_main_attachment[i]
   skip undefined: True
-  pdf template file: NJ_Power_of_Attorney_Delegation_Fillable-with-fields-with-fields9-19.pdf
+  pdf template file: nj_power_of_attorney_delegation.pdf
   fields:
       - "users_names": ${ users_names }
       - "users_addresses": ${ users_addresses }
