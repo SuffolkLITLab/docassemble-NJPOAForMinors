@@ -90,28 +90,34 @@ metadata:
   short title: >-
     NJ Temporary Caregiver Appointment
   description: |-
-    This form allows parents, custodians, or guardians to delegate authority to an alternative caregiver for the care of their minor child or ward. It ensures that the caregiver can make important decisions regarding the child's welfare.
+    This form is for a {parent}, {custodian}, or {guardian} of a minor child or {ward} in NJ wishing to temporarily give {parental powers} to someone else.
   can_I_use_this_form: |
-    You can use this form if you are a parent, custodian, or guardian wishing to temporarily delegate your authority over a minor child. Ensure you have the necessary consent from any other legal guardians involved.
+    You can use this form if you are a {parent}, {custodian}, or {guardian} of a minor child or {ward} in NJ wishing to temporarily give {parental powers} to someone else.
   before_you_start: |
     ### Before you get started
-    - Gather the necessary information about yourself, the child, and the alternative caregiver.
-    - Ensure that the other parent or legal guardian is available to provide consent if required.
+    - Collect names, addresses, and phone numbers for:
+      - The person you share custody with (if applicable)
+      - The caregiver
+      - The alternate caregiver
+    - Collect the names and birthdates of your children or wards.
 
     ### When you are finished
-    - Sign the form in the presence of witnesses.
-    - Provide a copy to the attorney-in-fact and retain a copy for your records.
+    - Sign the form in the presence of two witnesses.
+    - The other parent must sign if applicable.
+    - A notary may also be needed, depending on the powers you give.
+    - Keep a copy for yourself and give one to the caregiver and anyone else who needs it, such as your child's school.
+
   when_you_are_finished: |
-    After completing the form, ensure that the attorney-in-fact understands their responsibilities. Keep a copy for your records and provide one to the designated caregiver.
+    Sign the form in the presence of two witnesses. The other parent must sign if applicable. A notary may also be needed, depending on the powers you give. Keep a copy for yourself and give one to the caregiver and anyone else who needs it, such as your child's school.
   efiling_enabled: False
   integrated_efiling: False
   integrated_email_filing: False
-  requires_notarization: True
+  requires_notarization: False
   unlisted: False
   landing_page_url: >-
     https://courtformsonline.org/
   maturity: production
-  estimated_completion_minutes: ""
+  estimated_completion_minutes: 20
   estimated_completion_delta: ""
   LIST_topics:
     - "ES-03-03-05-00"
@@ -123,8 +129,7 @@ metadata:
   original_form_published_on: ""
   help_page_url: >-
     https://pub.njleg.gov/bills/2020/A5000/4640_I1.HTM
-  help_page_title: >-
-
+  help_page_title: "New Jersey Power of Attorney and Delegation of Authority Law"
   allowed_courts: []
   typical_role: "unknown"
   al_weaver_version: "2.3.1"
@@ -134,7 +139,7 @@ metadata:
   jurisdiction: "NAM-US-US+NJ"
   review_date: 2026-09-19
   form_titles:
-    - NJ Power of Attorney Delegation Fillable-with-fields-with-fields9-19
+    - Power of Attorney and Delegation of Authority
   form_numbers: []
   update_notes: ""
 ---
@@ -195,7 +200,7 @@ objects:
   - children: "ALPeopleList.using(ask_number=True, minimum_number=1, complete_attribute='age_checked')"
   - other_parent: "ALPeopleList.using(ask_number=True, target_number=1)"
   - users: "ALPeopleList.using(ask_number=True, target_number=1)"
-  - witnesses: "ALPeopleList.using(ask_number=True, target_number=2, complete_attribute='info_checked')"
+#  - witnesses: "ALPeopleList.using(ask_number=True, target_number=2, complete_attribute='info_checked')"
 ---
 sections:
   - intro: Introduction
@@ -855,13 +860,13 @@ review:
         * ${ item }
       % endfor
 
-  - Edit: witnesses.revisit
-    button: |
-      **Witnesses**
+#  - Edit: witnesses.revisit
+#    button: |
+#      **Witnesses**
 
-      % for item in witnesses:
-        * ${ item }
-      % endfor
+#      % for item in witnesses:
+#        * ${ item }
+#      % endfor
 
   - Edit: power_caregiving_yes
     button: |
@@ -935,16 +940,16 @@ review:
       **${ other_parent[0].name.full() }'s signature**
 
       Redo their signature
-  - Edit: witnesses[0].signature
-    button: |
-      **First witness signature**
+#  - Edit: witnesses[0].signature
+#    button: |
+#      **First witness signature**
 
-      Redo the first witness's signature
-  - Edit: witnesses[1].signature
-    button: |
-      **Second witness signature**
+#      Redo the first witness's signature
+#  - Edit: witnesses[1].signature
+#    button: |
+#      **Second witness signature**
 
-      Redo the second witness's signature
+#      Redo the second witness's #signature
 ---
 # reconsider: True
 # code: |
@@ -1218,12 +1223,12 @@ attachment:
       - "users_signature_date": ${ users_signature_date.format() }
       - "other_parent_signature": ${ other_parent[0].signature_if_final(i) }
       - "other_parent_signature_date": ${ other_parent_signature_date.format() }
-      - "witnesses1_signature": ${ witnesses[0].signature_if_final(i) }
-      - "witnesses1_address": ${ witnesses[0].address.on_one_line() }
-      - "witnesses1_signature_date": ${ witnesses1_signature_date.format() }
-      - "witnesses2_signature": ${ witnesses[1].signature_if_final(i) }
-      - "witnesses2_address": ${ witnesses[1].address.on_one_line() }
-      - "witnesses2_signature_date": ${ witnesses2_signature_date.format() }
+#      - "witnesses1_signature": ${ witnesses[0].signature_if_final(i) }
+#      - "witnesses1_address": ${ witnesses[0].address.on_one_line() }
+#      - "witnesses1_signature_date": ${ witnesses1_signature_date.format() }
+#      - "witnesses2_signature": ${ witnesses[1].signature_if_final(i) }
+#      - "witnesses2_address": ${ witnesses[1].address.on_one_line() }
+#      - "witnesses2_signature_date": ${ witnesses2_signature_date.format() }
 ---
 objects:
   - nj_power_of_attorney_delegation_fillablewithfieldswithfields919_next_steps_2: ALDocument.using(filename="nj_power_of_attorney_delegation_fillablewithfieldswithfields919_next_steps_2", title=str(nj_power_of_attorney_delegation_fillablewithfieldswithfields919_next_steps_2_attachment_title), enabled=al_next_steps_enabled, has_addendum=False)
