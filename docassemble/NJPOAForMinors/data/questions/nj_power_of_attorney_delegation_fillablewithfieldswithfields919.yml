@@ -320,7 +320,7 @@ fields:
   - label: Phone number
     field: "users[0].phone"
     datatype: al_international_phone
-    required: False
+    required: True
 ---
 id: number of children or wards
 question: "How many children or wards are you appointing a caregiver for?"
@@ -340,10 +340,7 @@ code: |
     child_word = "children"
     child_pos = "children's"
 
----
-template: help_text_1791844930907
-subject: "More information"
-content: "Add the help text here."
+
 ---
 
 id: not_eligible
@@ -930,16 +927,16 @@ review:
 
       Edit the reasons
       
-  - Edit: users[0].signature
-    button: |
-      **Your signature**
+ # - Edit: users[0].signature
+#    button: |
+#      **Your signature**
 
-      Redo your signature
-  - Edit: other_parent[0].signature
-    button: |
-      **${ other_parent[0].name.full() }'s signature**
+#      Redo your signature
+#  - Edit: other_parent[0].signature
+#    button: |
+#      **${ other_parent[0].name.full() }'s signature**
 
-      Redo their signature
+#      Redo their signature
 #  - Edit: witnesses[0].signature
 #    button: |
 #      **First witness signature**
@@ -1159,10 +1156,7 @@ content: |
 # content: |
 #   A minor child or ward is under 18 years old
 ---
-template: help_text_1791844981373
-subject: "More information"
-content: "Add the help text here."
----
+
 template: al_recipient_bundle.title
 content: |
   All forms to file
