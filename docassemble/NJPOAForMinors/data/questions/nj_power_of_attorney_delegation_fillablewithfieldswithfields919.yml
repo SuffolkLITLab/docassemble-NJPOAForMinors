@@ -127,7 +127,7 @@ metadata:
   original_form: []
   original_form_published_on: ""
   help_page_url: >-
-    https://pub.njleg.gov/bills/2020/A5000/4640_I1.HTM
+    https://pub.njleg.gov/bills/2020/PL21/192_.HTM
   help_page_title: "New Jersey Power of Attorney and Delegation of Authority Law"
   allowed_courts: []
   typical_role: "unknown"
@@ -183,7 +183,7 @@ code: |
   al_next_steps_document_title = 'Power of attorney'
   al_next_steps_document_purpose = 'Appointment of Parental Powers'
   al_next_steps_help_organization = ''
-  al_next_steps_help_url = 'https://pub.njleg.gov/bills/2020/A5000/4640_I1.HTM'
+  al_next_steps_help_url = 'https://pub.njleg.gov/bills/2020/PL21/192_.HTM'
   al_next_steps_generate_qr_code = False
   al_next_steps_what_happens_next = 'After completing the form, talk to the caregiver about their responsibilities. Keep a copy for your records and give one to the designated caregiver.'
   al_next_steps_what_can_decision_maker_do = 'The decision-maker can manage day-to-day care, make medical decisions, and handle educational needs for the child. They will act in the best interest of the child during the delegation period.'
@@ -248,6 +248,30 @@ code: |
       and defined('other_parent_will_sign') and not other_parent_will_sign
   )
   show_sole_custody_review = bool(defined('share_custody') and not share_custody)
+
+---
+id: start timing sync
+initial: True
+code: |
+  if defined('when_powers_start'):
+    # Keep the flags current if the start timing was edited
+    define('triggering_event_execution_yes', when_powers_start == 'signed')
+    define('later', when_powers_start == 'later')
+    if when_powers_start == 'later':
+      # Asks the events screen if it hasn't been answered yet
+      triggering_event_mental_incapacity_yes
+    else:
+      # Signing starts the powers: events no longer apply
+      undefine('triggering_event_mental_incapacity_yes',
+               'triggering_event_physical_debilitation_yes',
+               'triggering_event_immigration_yes',
+               'triggering_event_incarceration_yes',
+               'triggering_event_military_yes',
+               'triggering_event_death_yes',
+               'triggering_event_all_yes')
+
+  show_triggering_events_review = bool(
+      defined('when_powers_start') and when_powers_start == 'later')
 ---
 #################### Interview order #####################
 comment: |
@@ -922,11 +946,16 @@ review:
       Financial power granted: ${ word(yesno(power_financial_yes)) if defined('power_financial_yes') else '' }
 
       Other powers granted: ${ word(yesno(power_other_yes)) if defined('power_other_yes') else '' }
-  - Edit: triggering_event_execution_yes
+  - Edit: when_powers_start
     button: |
-      **Starting Events**
+      **When the powers start**
 
-      Sign form: ${ word(yesno(triggering_event_execution_yes)) if defined('triggering_event_execution_yes') else '' }
+      ${ ('When the form is signed' if when_powers_start == 'signed' else 'When an event I chose happens') if defined('when_powers_start') else '' }
+
+  - Edit: triggering_event_mental_incapacity_yes
+    show if: show_triggering_events_review
+    button: |
+      **Starting events**
 
       Mentally unable: ${ word(yesno(triggering_event_mental_incapacity_yes)) if defined('triggering_event_mental_incapacity_yes') else '' }
 
