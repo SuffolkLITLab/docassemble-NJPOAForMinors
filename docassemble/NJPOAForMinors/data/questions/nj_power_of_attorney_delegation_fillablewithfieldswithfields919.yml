@@ -1,4 +1,3 @@
-
 include:
   - docassemble.AssemblyLine:assembly_line.yml
   - docassemble.ALAnyState:any_state.yml
@@ -212,6 +211,44 @@ sections:
   - review_nj_power_of_attorney_delegation_main: Review
   - sign_and_submit: Print
 ---
+
+id: custody sync
+initial: True
+code: |
+  # Only active once the custody section has been answered
+  if defined('share_custody') and (defined('other_parent_will_sign') or defined('other_parent_consent_screen') or defined('alternate_consent_screen')):
+    if share_custody:
+      other_parent.gather()
+      other_parent_will_sign
+      if other_parent_will_sign:
+        # Signing: no reasons should exist
+        if defined('other_parent_consent_screen') or defined('alternate_consent_screen'):
+          undefine(*consent_answer_names)
+      else:
+        # Not signing: drop reasons that came from the sole-custody screen
+        if defined('alternate_consent_screen'):
+          undefine(*consent_answer_names)
+        other_parent_consent_screen
+    else:
+      # Sole custody: drop reasons that came from the consent screen
+      if defined('other_parent_consent_screen'):
+        undefine(*consent_answer_names)
+      alternate_consent_screen
+      # Overwrite the combined strings with values for the current answers
+    define('users_names', users[0].name.full() + (
+        " and " + other_parent[0].name.full() if share_custody else ""))
+    define('users_addresses', users[0].address.on_one_line() + (
+        "; " + other_parent[0].address.on_one_line() if share_custody else ""))
+    define('users_phone_numbers', phone_number_formatted(users[0].phone) + (
+        "; " + phone_number_formatted(other_parent[0].phone_number) if share_custody else ""))
+
+  show_other_parent_sign_review = bool(defined('share_custody') and share_custody)
+  show_other_parent_consent_review = bool(
+      defined('share_custody') and share_custody
+      and defined('other_parent_will_sign') and not other_parent_will_sign
+  )
+  show_sole_custody_review = bool(defined('share_custody') and not share_custody)
+---
 #################### Interview order #####################
 comment: |
   Controls order and branching logic for questions specific to this form
@@ -290,7 +327,9 @@ subquestion: |2
   * You can take back the powers at any time by telling the caregiver.
   
   ### When you are finished
-  * Sign the form in the presence of a notary, two witnesses and the person you share custody with (if applicable).
+  * Sign the form in the presence of two witnesses. 
+  * The person you share custody with must also sign, if applicable. 
+  * A notary may also be needed, depending on the powers you give.
   * Give a copy to the caregiver and keep a copy for yourself.
 
 terms:
@@ -482,13 +521,13 @@ validation code: |
 ---
 id: Triggering Events 1
 question: |
-  These powers will start
+  These powers will start when
 fields:
   - no label: when_powers_start
     datatype: radio
     choices:
-      - When this form is signed: signed
-      - At a later time that I will choose on the next screen: later
+      - This form is signed: signed
+      - An event I choose on the next screen happens: later
   - note: |
       ${ collapse_template(one_year) }
 ---
@@ -532,7 +571,7 @@ validation code: |
           or triggering_event_death_yes
           or triggering_event_all_yes):
     validation_error("Choose at least one event.",
-                     field=" triggering_event_all_yes")
+                     field="triggering_event_all_yes")
 ---
 
 id: question_1791498080632
@@ -829,6 +868,7 @@ review:
         * ${ item }
       % endfor
   - Edit: other_parent.revisit
+    show if: show_other_parent_sign_review
     button: |
       **Person you share custody with**
 
@@ -926,7 +966,7 @@ review:
       **Why you have sole custody**
 
       Edit the reasons
-      
+---    
  # - Edit: users[0].signature
 #    button: |
 #      **Your signature**
@@ -956,15 +996,22 @@ review:
 #     and not other_parent_will_sign
 #   )
 #   show_sole_custody_review = bool(not share_custody)
+
 ---
-reconsider: True
+
+
+
+id: consent answer names
 code: |
-  show_other_parent_sign_review = bool(defined('share_custody') and share_custody)
-  show_other_parent_consent_review = bool(
-      defined('share_custody') and share_custody
-      and defined('other_parent_will_sign') and not other_parent_will_sign
-  )
-  show_sole_custody_review = bool(defined('share_custody') and not share_custody)
+  consent_answer_names = [
+      'other_parent_no_custody_yes', 'other_parent_unable_consent_yes',
+      'other_parent_deceased_yes', 'other_parent_not_involved_yes',
+      'other_parent_unknown_yes', 'other_parent_unreachable_yes',
+      'users_diligent_efforts', 'other_parent_other_yes',
+      'other_parent_other_text', 'other_parent_consent_screen',
+      'alternate_consent_screen',
+  ]
+
 ---
 id: edit caregivers
 continue button field: caregivers.revisit
@@ -1213,10 +1260,10 @@ attachment:
       - "caregiver2_name": ${ caregivers2[0].name.full() }
       - "caregiver2_address": ${ caregivers2[0].address.on_one_line() }
       - "caregiver2_phone_number": ${ phone_number_formatted(caregivers2[0].phone_number)  }
-      - "users_signature": ${ users[0].signature_if_final(i) }
-      - "users_signature_date": ${ users_signature_date.format() }
-      - "other_parent_signature": ${ other_parent[0].signature_if_final(i) }
-      - "other_parent_signature_date": ${ other_parent_signature_date.format() }
+#      - "users_signature": ${ users[0].signature_if_final(i) }
+#      - "users_signature_date": ${ users_signature_date.format() }
+#      - "other_parent_signature": ${ other_parent[0].signature_if_final(i) }
+#      - "other_parent_signature_date": ${ other_parent_signature_date.format() }
 #      - "witnesses1_signature": ${ witnesses[0].signature_if_final(i) }
 #      - "witnesses1_address": ${ witnesses[0].address.on_one_line() }
 #      - "witnesses1_signature_date": ${ witnesses1_signature_date.format() }
