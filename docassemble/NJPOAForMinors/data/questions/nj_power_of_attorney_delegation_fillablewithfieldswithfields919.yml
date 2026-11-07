@@ -1,4 +1,3 @@
-
 include:
   - docassemble.AssemblyLine:assembly_line.yml
   - docassemble.ALAnyState:any_state.yml
@@ -211,6 +210,44 @@ sections:
   - case_details: Appointment Details
   - review_nj_power_of_attorney_delegation_main: Review
   - sign_and_submit: Print
+---
+
+id: custody sync
+initial: True
+code: |
+  # Only active once the custody section has been answered
+  if defined('share_custody') and (defined('other_parent_will_sign') or defined('other_parent_consent_screen') or defined('alternate_consent_screen')):
+    if share_custody:
+      other_parent.gather()
+      other_parent_will_sign
+      if other_parent_will_sign:
+        # Signing: no reasons should exist
+        if defined('other_parent_consent_screen') or defined('alternate_consent_screen'):
+          undefine(*consent_answer_names)
+      else:
+        # Not signing: drop reasons that came from the sole-custody screen
+        if defined('alternate_consent_screen'):
+          undefine(*consent_answer_names)
+        other_parent_consent_screen
+    else:
+      # Sole custody: drop reasons that came from the consent screen
+      if defined('other_parent_consent_screen'):
+        undefine(*consent_answer_names)
+      alternate_consent_screen
+      # Overwrite the combined strings with values for the current answers
+    define('users_names', users[0].name.full() + (
+        " and " + other_parent[0].name.full() if share_custody else ""))
+    define('users_addresses', users[0].address.on_one_line() + (
+        "; " + other_parent[0].address.on_one_line() if share_custody else ""))
+    define('users_phone_numbers', phone_number_formatted(users[0].phone) + (
+        "; " + phone_number_formatted(other_parent[0].phone_number) if share_custody else ""))
+
+  show_other_parent_sign_review = bool(defined('share_custody') and share_custody)
+  show_other_parent_consent_review = bool(
+      defined('share_custody') and share_custody
+      and defined('other_parent_will_sign') and not other_parent_will_sign
+  )
+  show_sole_custody_review = bool(defined('share_custody') and not share_custody)
 ---
 #################### Interview order #####################
 comment: |
@@ -831,6 +868,7 @@ review:
         * ${ item }
       % endfor
   - Edit: other_parent.revisit
+    show if: show_other_parent_sign_review
     button: |
       **Person you share custody with**
 
@@ -928,7 +966,7 @@ review:
       **Why you have sole custody**
 
       Edit the reasons
-      
+---    
  # - Edit: users[0].signature
 #    button: |
 #      **Your signature**
@@ -958,15 +996,22 @@ review:
 #     and not other_parent_will_sign
 #   )
 #   show_sole_custody_review = bool(not share_custody)
+
 ---
-reconsider: True
+
+
+
+id: consent answer names
 code: |
-  show_other_parent_sign_review = bool(defined('share_custody') and share_custody)
-  show_other_parent_consent_review = bool(
-      defined('share_custody') and share_custody
-      and defined('other_parent_will_sign') and not other_parent_will_sign
-  )
-  show_sole_custody_review = bool(defined('share_custody') and not share_custody)
+  consent_answer_names = [
+      'other_parent_no_custody_yes', 'other_parent_unable_consent_yes',
+      'other_parent_deceased_yes', 'other_parent_not_involved_yes',
+      'other_parent_unknown_yes', 'other_parent_unreachable_yes',
+      'users_diligent_efforts', 'other_parent_other_yes',
+      'other_parent_other_text', 'other_parent_consent_screen',
+      'alternate_consent_screen',
+  ]
+
 ---
 id: edit caregivers
 continue button field: caregivers.revisit
