@@ -267,7 +267,8 @@ code: |
                'triggering_event_immigration_yes',
                'triggering_event_incarceration_yes',
                'triggering_event_military_yes',
-               'triggering_event_death_yes',
+               'triggering_event_death_yes', 'triggering_event_other_yes',
+               'triggering_event_other_explain',
                'triggering_event_all_yes')
 
   show_triggering_events_review = bool(
@@ -581,6 +582,14 @@ fields:
     datatype: yesno
   - Die and have made no other arrangements: triggering_event_death_yes
     datatype: yesno
+  - Other: triggering_event_other_yes
+    datatype: yesno
+  - label: Describe the other event
+    field: triggering_event_other_explain
+    show if: triggering_event_other_yes
+    required: False
+    maxlength: 100
+    help: "Keep this short. The form has room for about 100 characters."
   - label: "All of the above"
     field: triggering_event_all_yes
     datatype: yesno
@@ -593,9 +602,13 @@ validation code: |
           or triggering_event_incarceration_yes
           or triggering_event_military_yes
           or triggering_event_death_yes
+          or triggering_event_other_yes
           or triggering_event_all_yes):
     validation_error("Choose at least one event.",
                      field="triggering_event_all_yes")
+  if triggering_event_other_yes and not triggering_event_other_explain:
+    validation_error("Describe the other event.",
+                     field="triggering_event_other_explain")
 ---
 
 id: question_1791498080632
@@ -643,8 +656,8 @@ fields:
     required: False
     show if: other_parent_unreachable_yes
     input type: area
-    maxlength: 500
-    help: "Keep this short. The form has room for about 500 characters."
+    maxlength: 450
+    help: "Keep this short. The form has room for about 450 characters."
   - Other: other_parent_other_yes
     datatype: yesno
   - label: Other explanation
@@ -975,6 +988,10 @@ review:
 
       Death: ${ word(yesno(triggering_event_death_yes)) if defined('triggering_event_death_yes') else '' }
 
+      Other: ${ word(yesno(triggering_event_other_yes)) if defined('triggering_event_other_yes') else '' }
+
+      ${ ('Other event: ' + triggering_event_other_explain) if defined('triggering_event_other_yes') and triggering_event_other_yes and defined('triggering_event_other_explain') and triggering_event_other_explain else '' }
+      
   - Edit: share_custody
     button: |
       **Do you share custody?**
@@ -1292,6 +1309,8 @@ attachment:
       - "triggering_event_incarceration_yes": ${ triggering_event_incarceration_yes }
       - "triggering_event_military_yes": ${ triggering_event_military_yes }
       - "triggering_event_death_yes": ${ triggering_event_death_yes }
+      - "triggering_event_other_yes": ${ triggering_event_other_yes }
+      - "triggering_event_other_explain": ${ triggering_event_other_explain if triggering_event_other_yes else "" }
       - "caregiver2_name": ${ caregivers2[0].name.full() }
       - "caregiver2_address": ${ caregivers2[0].address.on_one_line() }
       - "caregiver2_phone_number": ${ phone_number_formatted(caregivers2[0].phone_number)  }
