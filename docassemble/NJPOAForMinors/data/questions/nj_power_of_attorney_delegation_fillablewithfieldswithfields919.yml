@@ -89,9 +89,9 @@ metadata:
   short title: >-
     NJ Temporary Caregiver Appointment
   description: |-
-    This form is for a {parent}, {custodian}, or {guardian} of a minor child or {ward} in NJ wishing to temporarily give {parental powers} to someone else.
+    This form is for a parent, custodian, or guardian of a minor child or ward in NJ wishing to temporarily give parental powers to someone else.
   can_I_use_this_form: |
-    You can use this form if you are a {parent}, {custodian}, or {guardian} of a minor child or {ward} in NJ wishing to temporarily give {parental powers} to someone else.
+    You can use this form if you are a parent, custodian, or guardian of a minor child or ward in NJ wishing to temporarily give parental powers to someone else.
   before_you_start: |
     ### Before you get started
     - Collect names, addresses, and phone numbers for:
@@ -151,7 +151,7 @@ code: |
   AL_DEFAULT_STATE = "NJ"
 ---
 code: |
-  github_repo_name = 'docassemble-NjPowerOfAttorneyDelegationFillablewithfieldswithfields919'
+  github_repo_name = 'docassemble-NJPOAForMinors'
 ---
 template: interview_short_title
 content: |2
@@ -643,6 +643,8 @@ fields:
     required: False
     show if: other_parent_unreachable_yes
     input type: area
+    maxlength: 500
+    help: "Keep this short. The form has room for about 500 characters."
   - Other: other_parent_other_yes
     datatype: yesno
   - label: Other explanation
@@ -650,6 +652,8 @@ fields:
     input type: area
     required: False
     show if: other_parent_other_yes
+    maxlength: 400
+    help: "Keep this short. The form has room for about 400 characters."
 
 validation code: |
   if not (other_parent_no_custody_yes or other_parent_unable_consent_yes
@@ -677,6 +681,8 @@ fields:
     input type: area
     required: False
     show if: other_parent_other_yes
+    maxlength: 400
+    help: "Keep this short. The form has room for about 400 characters."
 validation code: |
   if not (other_parent_unknown_yes or other_parent_no_custody_yes
           or other_parent_deceased_yes or other_parent_other_yes):
