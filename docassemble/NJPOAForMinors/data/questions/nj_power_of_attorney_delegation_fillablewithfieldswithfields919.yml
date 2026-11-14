@@ -1072,7 +1072,9 @@ question: |
 subquestion: |
   ${ caregivers.table }
 
+  % if caregivers.number_gathered() < 1:
   ${ caregivers.add_action() }
+  % endif
 ---
 table: caregivers.table
 rows: caregivers
@@ -1117,7 +1119,9 @@ question: |
 subquestion: |
   ${ other_parent.table }
 
+  % if other_parent.number_gathered() < 1:
   ${ other_parent.add_action() }
+  % endif
 ---
 table: other_parent.table
 rows: other_parent
@@ -1163,7 +1167,9 @@ question: |
 subquestion: |
   ${ users.table }
 
+  % if users.number_gathered() < 1:
   ${ users.add_action() }
+  % endif
 ---
 table: users.table
 rows: users
