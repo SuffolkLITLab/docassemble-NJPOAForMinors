@@ -1,3 +1,10 @@
+---
+translations:
+  - FamilySpanish06_es.xlsx
+---
+include:
+  - family_spanish_words.yml
+---
 include:
   - docassemble.AssemblyLine:assembly_line.yml
   - docassemble.ALAnyState:any_state.yml
@@ -136,8 +143,7 @@ metadata:
   typical_role: "unknown"
   al_weaver_version: "2.3.1"
   generated_on: "2026-09-19"
-  languages:
-    - en
+  languages: [en, es]
   jurisdiction: "NAM-US-US+NJ"
   review_date: 2026-09-19
   form_titles:
@@ -180,17 +186,12 @@ code: |
   speak_text = True
   enable_al_language = True
   al_user_default_language = 'en'
-  al_interview_languages = ['en']
+  al_interview_languages = ["en", "es"]
   github_user = ''
   al_next_steps_enabled = True
-  al_next_steps_document_title = 'Power of attorney'
-  al_next_steps_document_purpose = 'Appointment of Parental Powers'
   al_next_steps_help_organization = ''
   al_next_steps_help_url = 'https://pub.njleg.gov/bills/2020/PL21/192_.HTM'
   al_next_steps_generate_qr_code = False
-  al_next_steps_what_happens_next = 'After completing the form, talk to the caregiver about their responsibilities. Keep a copy for your records and give one to the designated caregiver.'
-  al_next_steps_what_can_decision_maker_do = 'The decision-maker can manage day-to-day care, make medical decisions, and handle educational needs for the child. They will act in the best interest of the child during the delegation period.'
-  al_next_steps_what_happens_if_i_win = 'If the delegation is successful, the child will receive the necessary care and support while you are unable to provide it. You can revoke the delegation at any time if circumstances change.'
   # AL_DEFAULT_COUNTRY is set in one of your own code blocks, not here.
   # AL_DEFAULT_STATE is set in one of your own code blocks, not here.
   # al_form_type is set in one of your own code blocks, not here.
@@ -544,7 +545,7 @@ validation code: |
   if not (power_caregiving_yes or power_wellbeing_yes or power_education_yes
           or power_healthcare_yes or power_travel_yes or power_financial_yes
           or power_other_yes or power_all_yes):
-    validation_error("Choose at least one power to give the caregiver.",
+    validation_error(word("Choose at least one power to give the caregiver."),
                      field="power_all_yes")
 ---
 id: Triggering Events 1
@@ -607,10 +608,10 @@ validation code: |
           or triggering_event_death_yes
           or triggering_event_other_yes
           or triggering_event_all_yes):
-    validation_error("Choose at least one event.",
+    validation_error(word("Choose at least one event."),
                      field="triggering_event_all_yes")
   if triggering_event_other_yes and not triggering_event_other_explain:
-    validation_error("Describe the other event.",
+    validation_error(word("Describe the other event."),
                      field="triggering_event_other_explain")
 ---
 
@@ -676,7 +677,7 @@ validation code: |
           or other_parent_deceased_yes or other_parent_not_involved_yes
           or other_parent_unknown_yes or other_parent_unreachable_yes
           or other_parent_other_yes):
-    validation_error("Choose at least one reason.",
+    validation_error(word("Choose at least one reason."),
                      field="other_parent_other_yes")
 ---
 id: alternate_consent
@@ -702,7 +703,7 @@ fields:
 validation code: |
   if not (other_parent_unknown_yes or other_parent_no_custody_yes
           or other_parent_deceased_yes or other_parent_other_yes):
-    validation_error("Choose at least one reason.",
+    validation_error(word("Choose at least one reason."),
                      field="other_parent_other_yes")
 ---
 comment: |
@@ -1083,16 +1084,18 @@ table: caregivers.table
 rows: caregivers
 columns:
   - Name: |
-      row_item.name_full() if defined("row_item.name.first") else ""
+      row_item.name_full() if row_item.name.attribute_defined('first') else ""
   - Address: |
-      row_item.address.on_one_line() if defined("row_item.address.address") else ""
+      row_item.address.on_one_line() if row_item.address.attribute_defined('address') else ""
   - Phone number: |
-      row_item.phone_number if defined("row_item.phone_number") else ""
+      row_item.phone_number if row_item.attribute_defined('phone_number') else ""
 edit:
   - name.first
   - address.address
   - phone_number
 confirm: True
+edit header: |
+  ${ word("Actions") }
 ---
 id: edit children
 continue button field: children.revisit
@@ -1107,13 +1110,15 @@ table: children.table
 rows: children
 columns:
   - Name: |
-      row_item.name_full() if defined("row_item.name.first") else ""
+      row_item.name_full() if row_item.name.attribute_defined('first') else ""
   - Birthdate: |
-      row_item.birthdate if defined("row_item.birthdate") else ""
+      row_item.birthdate if row_item.attribute_defined('birthdate') else ""
 edit:
   - name.first
   - birthdate
 confirm: True
+edit header: |
+  ${ word("Actions") }
 ---
 id: edit other parent
 continue button field: other_parent.revisit
@@ -1130,16 +1135,18 @@ table: other_parent.table
 rows: other_parent
 columns:
   - Name: |
-      row_item.name_full() if defined("row_item.name.first") else ""
+      row_item.name_full() if row_item.name.attribute_defined('first') else ""
   - Address: |
-      row_item.address.on_one_line() if defined("row_item.address.address") else ""
+      row_item.address.on_one_line() if row_item.address.attribute_defined('address') else ""
   - Phone number: |
-      row_item.phone_number if defined("row_item.phone_number") else ""
+      row_item.phone_number if row_item.attribute_defined('phone_number') else ""
 edit:
   - name.first
   - address.address
   - phone_number
 confirm: True
+edit header: |
+  ${ word("Actions") }
 ---
 # id: edit witnesses
 # continue button field: witnesses.revisit
@@ -1154,9 +1161,9 @@ confirm: True
 # rows: witnesses
 # columns:
 #   - Name: |
-#       row_item.name_full() if defined("row_item.name.first") else ""
+#       row_item.name_full() if row_item.name.attribute_defined('first') else ""
 #   - Address: |
-#       row_item.address.on_one_line() if defined("row_item.address.address") else ""
+#       row_item.address.on_one_line() if row_item.address.attribute_defined('address') else ""
 #
 # edit:
 #   - name.first
@@ -1178,16 +1185,18 @@ table: users.table
 rows: users
 columns:
   - Name: |
-      row_item.name_full() if defined("row_item.name.first") else ""
+      row_item.name_full() if row_item.name.attribute_defined('first') else ""
   - Address: |
-      row_item.address.on_one_line() if defined("row_item.address.address") else ""
+      row_item.address.on_one_line() if row_item.address.attribute_defined('address') else ""
   - Phone number: |
-      phone_number_formatted(row_item.phone) if defined("row_item.phone") else ""
+      phone_number_formatted(row_item.phone) if row_item.attribute_defined('phone') else ""
 edit:
   - name.first
   - address.address
   - phone
 confirm: True
+edit header: |
+  ${ word("Actions") }
 ---
 id: edit caregivers2
 continue button field: caregivers2.revisit
@@ -1200,16 +1209,18 @@ table: caregivers2.table
 rows: caregivers2
 columns:
   - Name: |
-      row_item.name_full() if defined("row_item.name.first") else ""
+      row_item.name_full() if row_item.name.attribute_defined('first') else ""
   - Address: |
-      row_item.address.on_one_line() if defined("row_item.address.address") else ""
+      row_item.address.on_one_line() if row_item.address.attribute_defined('address') else ""
   - Phone number: |
-      phone_number_formatted(row_item.phone_number) if defined("row_item.phone_number") else ""
+      phone_number_formatted(row_item.phone_number) if row_item.attribute_defined('phone_number') else ""
 edit:
   - name.first
   - address.address
   - phone_number
 delete buttons: False
+edit header: |
+  ${ word("Actions") }
 ---
 id: download nj_power_of_attorney_delegation_main
 event: nj_power_of_attorney_delegation_main_download
@@ -1371,3 +1382,14 @@ question: |
   Alt text
 fields:
   - "Alt text": alt_text
+---
+language: es
+sections:
+- intro: Introducción
+- parties: Su información
+- children_info: Niños
+- custody: Información de la custodia
+- caregiver_info: Persona cuidadora y suplente
+- case_details: Detalles de la designación
+- review_nj_power_of_attorney_delegation_main: Revisar
+- sign_and_submit: Imprimir
